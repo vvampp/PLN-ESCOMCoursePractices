@@ -10,40 +10,38 @@ from itertools import zip_longest
 
 # Unigramas
 def freqUniVectorize(corpus):
-    freq_vectorizator = CountVectorizer()
-    X = freq_vectorizator.fit_transform(corpus)
+    freq_vectorizator_uni = CountVectorizer()
+    X = freq_vectorizator_uni.fit_transform(corpus)
     return X
 
 def oneHotUniVectorize(corpus):
-    oneHot_vectorizator = CountVectorizer(binary=True)
-    X = oneHot_vectorizator.fit_transform(corpus)
+    oneHot_vectorizator_uni = CountVectorizer(binary=True)
+    X = oneHot_vectorizator_uni.fit_transform(corpus)
     return X
 
 def tfidfUniVectorize(corpus):
-    tfidf_vectorizator = TfidfVectorizer()
-    X = tfidf_vectorizator.fit_transform(corpus)
+    tfidf_vectorizator_uni = TfidfVectorizer()
+    X = tfidf_vectorizator_uni.fit_transform(corpus)
     return X
 
 # Bigramas
 def freqBiVectorize(corpus):
-    freq_vectorizator = CountVectorizer(ngram_range=(2,2))
-    X = freq_vectorizator.fit_transform(corpus)
+    freq_vectorizator_bi = CountVectorizer(ngram_range=(2,2))
+    X = freq_vectorizator_bi.fit_transform(corpus)
     return X
 
 def oneHotBiVectorize(corpus):
-    oneHot_vectorizator = CountVectorizer(binary=True,ngram_range=(2,2))
-    X = oneHot_vectorizator.fit_transform(corpus)
+    oneHot_vectorizator_bi = CountVectorizer(binary=True,ngram_range=(2,2))
+    X = oneHot_vectorizator_bi.fit_transform(corpus)
     return X
 
 def tfidfBiVectorize(corpus):
-    tfidf_vectorizator = TfidfVectorizer(ngram_range=(2,2))
-    X = tfidf_vectorizator.fit_transform(corpus)
+    tfidf_vectorizator_bi = TfidfVectorizer(ngram_range=(2,2))
+    X = tfidf_vectorizator_bi.fit_transform(corpus)
     return X
 
 
 def main():
-    print("main")
-
     normalized_corpus = 'normalized_data_corpus.csv'
     try:
         source_file = pd.read_csv(normalized_corpus, sep='\t')
