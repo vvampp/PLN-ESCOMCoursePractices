@@ -5,7 +5,6 @@ import numpy as np
 import os.path
 import pickle
 from itertools import zip_longest
-import shutil
 
 
 
@@ -48,9 +47,9 @@ def main(source_file):
 
     titleCorpus = source_file['Title'].tolist()
     contentCorpus = source_file['Content'].tolist()
-    tandCcorpus =  [itemT + " " + (itemC if itemC is not None else "") for itemT,itemC in zip_longest(titleCorpus,contentCorpus, fillvalue="")]
+    TandCcorpus =  [itemT + " " + (itemC if itemC is not None else "") for itemT,itemC in zip_longest(titleCorpus,contentCorpus, fillvalue="")]
 
-    corpuses = {'titleCorpus': titleCorpus, 'contentCorpus': contentCorpus, 'tandCcorpus': tandCcorpus}
+    corpuses = {'titleCorpus': titleCorpus, 'contentCorpus': contentCorpus, 'TandCcorpus': TandCcorpus}
     ngrams = ['uni','bi']
     vectorization_methods = {
         'freq': {'uni': freqUniVectorize, 'bi': freqBiVectorize},
