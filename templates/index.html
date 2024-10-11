@@ -107,11 +107,11 @@
 
     <div class="container">
         <h1>Análisis de Similitud de Documentos</h1>
-        <form method="POST" onsubmit="validarFormularioCorpus(event)">
             <!-- Subida de corpus normalizado (corpus)-->
+        <form method="POST" enctype="multipart/form-data" onsubmit="validarFormularioCorpus(event)">
             <div class="form-group">
                 <label for="file-input-corpus">Subir corpus normalizado (csv):</label>
-                <input type="file" id="file-input-corpus" accept=".csv" required onblur="validarArchivoCorpus()">
+                <input type="file" id="file-input-corpus" name="file-input-corpus" accept=".csv" required onblur="validarArchivoCorpus()">
                 <span id="error-file-corpus" class="error"></span>
             </div>
             <!-- Botón para Vectorizar el corpus completo-->
