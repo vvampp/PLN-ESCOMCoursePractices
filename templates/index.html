@@ -132,7 +132,7 @@
         <h1>Análisis de Similitud de Documentos</h1>
         
             <!-- Subida de corpus normalizado (corpus)-->
-        <form method="POST" enctype="multipart/form-data" onsubmit="validarFormularioCorpus(event)">
+        <form action="/vectorizar" method="POST" enctype="multipart/form-data" onsubmit="validarFormularioCorpus(event)">
             <div class="form-group-vector">
                 <label for="file-input-corpus">Corpus normalizado (csv):</label>
                 <input type="file" id="file-input-corpus" name="file-input-corpus" accept=".csv" required onblur="validarArchivoCorpus()">
@@ -141,11 +141,11 @@
             </div>
         </form>
 
-        <form method="POST" onsubmit="validarFormulario(event)">
+        <form action="/analizar" method="POST" enctype="multipart/form-data" onsubmit="validarFormulario(event)">
             <!-- Subida de archivo de prueba (test) -->
             <div class="form-group">
                 <label for="file-input-test">Documento de prueba (csv):</label>
-                <input type="file" id="file-input-test" accept=".csv" required onblur="validarArchivoTest()">
+                <input type="file" id="file-input-test"  name="file-input-test" accept=".csv" required onblur="validarArchivoTest()">
                 <span id="error-file-test" class="error"></span>
             </div>
 
