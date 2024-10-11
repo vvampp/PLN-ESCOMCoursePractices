@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Análisis de Similitud de Documentos</title>
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            background-color: #e9ecef;
+            margin: 0;
+            padding: 0;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 50px auto;
+            background-color: #fff;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 0 30px rgba(0, 0, 0, 0.2);
+            transition: transform 0.2s;
+        }
+
+        .container:hover {
+            transform: scale(1.05);
+        }
+
+        h1 {
+            text-align: center;
+            color: #333;
+            margin-bottom: 20px;
+            font-size: 2.5em;
+            border-bottom: 2px solid #007bff;
+            padding-bottom: 10px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+            background-color: #f8f9fa;
+            padding: 15px;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: bold;
+            color: #555;
+        }
+
+        input[type="file"],
+        select {
+            width: 100%;
+            padding: 10px 0px;
+            font-size: 16px;
+            border-radius: 5px;
+            border: 1px solid #ced4da;
+            transition: border-color 0.3s;
+        }
+
+        input[type="file"]:focus,
+        select:focus {
+            border-color: #007bff;
+            outline: none;
+        }
+
+        .button-container {
+            text-align: center;
+        }
+
+        button {
+            background-color: #007bff;
+            color: white;
+            padding: 12px 20px;
+            margin-top: 10px;
+            font-size: 18px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s ease, transform 0.2s;
+            font-weight: bold;
+        }
+
+        button:hover {
+            background-color: #0056b3;
+            transform: translateY(-2px);
+        }
+
+        .result {
+            margin-top: 30px;
+            padding: 20px;
+            background-color: #f8f9fa;
+            border-radius: 5px;
+            color: #333;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+
+        footer {
+            text-align: center;
+            padding: 0 10px 10px 10px;
+            color: #6c757d;
+        }
+        span{
+            color: red;
+            font-size: 10px;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <h1>Análisis de Similitud de Documentos</h1>
+        <form method="POST" onsubmit="validarFormulario()">
+            <!-- Subida de archivo -->
+            <div class="form-group">
+                <label for="file-input">Subir documento de prueba (texto):</label>
+                <input type="file" id="file-input" accept=".csv" required onblur="validarArchivo()">
+                <span id="error-file" class="error"></span>
+            </div>
+
+            <!-- Selección de vectorización -->
+            <div class="form-group">
+                <label for="vector-type">Seleccionar tipo de vectorización:</label>
+                <select id="vector-type" required onblur="validarVectorizacion()">
+                    <option value="">Seleccione una opción</option>
+                    <option value="tfidf">TF-IDF</option>
+                    <option value="frecuencia">Frecuencia</option>
+                    <option value="binarizado">Binarizado</option>
+                </select>
+                <span id="error-vector" class="error"></span>
+            </div>
+
+            <!-- Selección de características -->
+            <div class="form-group">
+                <label for="feature-type">Seleccionar características a extraer:</label>
+                <select id="feature-type" required onblur="validarCaracteristicas()">
+                    <option value="">Seleccione una opción</option>
+                    <option value="unigramas">Unigramas</option>
+                    <option value="bigramas">Bigramas</option>
+                </select>
+                <span id="error-feature" class="error"></span>
+            </div>
+
+            <!-- Selección de elemento a comparar -->
+            <div class="form-group">
+                <label for="compare-element">Seleccionar elemento a comparar:</label>
+                <select id="compare-element" required onblur="validarElemento()">
+                    <option value="">Seleccione una opción</option>
+                    <option value="titulo">Título</option>
+                    <option value="contenido">Contenido</option>
+                    <option value="titulo-contenido">Título + Contenido</option>
+                </select>
+                <span id="error-element" class="error"></span>
+            </div>
+
+            <!-- Botón de enviar -->
+            <div class="button-container">
+                <button type="submit">Realizar Análisis</button>
+            </div>
+        </form>
+    </div>
+
+    <footer>
+        &copy; 2024 Análisis de Documentos. Todos los derechos reservados a Los Bambianos.
+    </footer>
+
+
+    <script>
+        function mostrarMensaje(message, element){
+            var errorElement = document.getElementById("error-"+element)
+            var inputElement = document.getElementById(element)
+
+            errorElement.innerHTML = message
+        }
+        function ocultarMensaje(element){
+            var errorElement = document.getElementById("error-"+element)
+            var inputElement = document.getElementById(element)
+
+            errorElement.innerHTML = ""
+        }
+        function validarArchivo(){
+            const fileInput = document.getElementById('file-input');
+            const file = fileInput.files[0];
+        
+            // Verifica si se ha seleccionado un archivo
+            if (!file) {
+                mostrarMensaje("Por favor, selecciona un archivo.", "file");
+            }else{
+                ocultarMensaje("file")
+            }
+
+        }
+        function validarVectorizacion(){
+            const vector = document.getElementById('vector-type')
+            const vectorValue = vector.value
+
+            if(vectorValue == ""){
+                mostrarMensaje("Seleccionar una opcion valida", "vector")
+            }else{
+                ocultarMensaje("vector")
+            }
+        }
+        function validarCaracteristicas(){
+            const feature = document.getElementById('feature-type')
+            const featureValue = feature.value
+
+            if(featureValue == ""){
+                mostrarMensaje("Seleccionar una opcion valida", "feature")
+            }else{
+                ocultarMensaje("feature")
+            }
+        }
+        function validarElemento(){
+            const element = document.getElementById('compare-element')
+            const elementValue = element.value
+
+            if(elementValue == ""){
+                mostrarMensaje("Seleccionar una opcion valida", "element")
+            }else{
+                ocultarMensaje("element")
+            }
+        }
+        function validarFormulario(){
+            e
+        }
+    </script>
+</body>
+</html>
