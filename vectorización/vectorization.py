@@ -5,6 +5,7 @@ import numpy as np
 import os.path
 import pickle
 from itertools import zip_longest
+import argparse
 
 
 
@@ -42,9 +43,13 @@ def tfidfBiVectorize(corpus):
 
 
 def main():
-    normalized_corpus = 'normalized_data_corpus.csv'
+
+    parser = argparse.ArgumentParser(description="Vectorización de Corpus Normalizado")
+    parser.add_argument('file_path', type=str, help="Ruta del archivo CSV con el corpus normalizado (normalized_data_corpus.csv)")
+    arguments = parser.parse_args()
+
     try:
-        source_file = pd.read_csv(normalized_corpus, sep='\t')
+        source_file = pd.read_csv(arguments.file_path, sep='\t')
     except:
         print("An excepction occurred")
 
