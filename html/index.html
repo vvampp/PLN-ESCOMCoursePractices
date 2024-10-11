@@ -16,21 +16,17 @@
             max-width: 800px;
             margin: 50px auto;
             background-color: #fff;
-            padding: 30px;
-            border-radius: 10px;
-            box-shadow: 0 0 30px rgba(0, 0, 0, 0.2);
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 0 20px rgba(0, 0, 0, 0.15);
             transition: transform 0.2s;
-        }
-
-        .container:hover {
-            transform: scale(1.05);
         }
 
         h1 {
             text-align: center;
             color: #333;
             margin-bottom: 20px;
-            font-size: 2.5em;
+            font-size: 2em;
             border-bottom: 2px solid #007bff;
             padding-bottom: 10px;
         }
@@ -53,7 +49,7 @@
         input[type="file"],
         select {
             width: 100%;
-            padding: 10px 0px;
+            padding: 8px;
             font-size: 16px;
             border-radius: 5px;
             border: 1px solid #ced4da;
@@ -68,14 +64,14 @@
 
         .button-container {
             text-align: center;
+            margin-bottom: 10px;
         }
 
         button {
             background-color: #007bff;
             color: white;
-            padding: 12px 20px;
-            margin-top: 10px;
-            font-size: 18px;
+            padding: 10px 15px;
+            font-size: 16px;
             border: none;
             border-radius: 5px;
             cursor: pointer;
@@ -85,7 +81,6 @@
 
         button:hover {
             background-color: #0056b3;
-            transform: translateY(-2px);
         }
 
         .result {
@@ -102,7 +97,7 @@
             padding: 0 10px 10px 10px;
             color: #6c757d;
         }
-        span{
+        span {
             color: red;
             font-size: 10px;
         }
@@ -112,12 +107,25 @@
 
     <div class="container">
         <h1>Análisis de Similitud de Documentos</h1>
-        <form method="POST" onsubmit="validarFormulario()">
-            <!-- Subida de archivo -->
+        <form method="POST" onsubmit="validarFormularioCorpus(event)">
+            <!-- Subida de corpus normalizado (corpus)-->
             <div class="form-group">
-                <label for="file-input">Subir documento de prueba (texto):</label>
-                <input type="file" id="file-input" accept=".csv" required onblur="validarArchivo()">
-                <span id="error-file" class="error"></span>
+                <label for="file-input-corpus">Subir corpus normalizado (csv):</label>
+                <input type="file" id="file-input-corpus" accept=".csv" required onblur="validarArchivoCorpus()">
+                <span id="error-file-corpus" class="error"></span>
+            </div>
+            <!-- Botón para Vectorizar el corpus completo-->
+            <div class="button-container">
+                <button type="submit">Vectorizar Corpus</button>
+            </div>
+        </form>
+
+        <form method="POST" onsubmit="validarFormulario(event)">
+            <!-- Subida de archivo de prueba (test) -->
+            <div class="form-group">
+                <label for="file-input-test">Subir documento de prueba (csv):</label>
+                <input type="file" id="file-input-test" accept=".csv" required onblur="validarArchivoTest()">
+                <span id="error-file-test" class="error"></span>
             </div>
 
             <!-- Selección de vectorización -->
@@ -166,64 +174,87 @@
         &copy; 2024 Análisis de Documentos. Todos los derechos reservados a Los Bambianos.
     </footer>
 
-
     <script>
         function mostrarMensaje(message, element){
-            var errorElement = document.getElementById("error-"+element)
-            var inputElement = document.getElementById(element)
-
-            errorElement.innerHTML = message
+            var errorElement = document.getElementById("error-"+element);
+            errorElement.innerHTML = message;
         }
+
         function ocultarMensaje(element){
-            var errorElement = document.getElementById("error-"+element)
-            var inputElement = document.getElementById(element)
-
-            errorElement.innerHTML = ""
+            var errorElement = document.getElementById("error-"+element);
+            errorElement.innerHTML = "";
         }
-        function validarArchivo(){
-            const fileInput = document.getElementById('file-input');
+
+        function validarArchivoCorpus(){
+            const fileInput = document.getElementById('file-input-corpus');
             const file = fileInput.files[0];
-        
-            // Verifica si se ha seleccionado un archivo
             if (!file) {
-                mostrarMensaje("Por favor, selecciona un archivo.", "file");
-            }else{
-                ocultarMensaje("file")
+                mostrarMensaje("Por favor, selecciona un archivo.", "file-corpus");
+                return false;
+            } else {
+                ocultarMensaje("file-corpus");
+                return true;
             }
-
         }
+
+        function validarArchivoTest(){
+            const fileInput = document.getElementById('file-input-test');
+            const file = fileInput.files[0];
+            if (!file) {
+                mostrarMensaje("Por favor, selecciona un archivo.", "file-test");
+                return false;
+            } else {
+                ocultarMensaje("file-test");
+                return true;
+            }
+        }
+
         function validarVectorizacion(){
-            const vector = document.getElementById('vector-type')
-            const vectorValue = vector.value
-
-            if(vectorValue == ""){
-                mostrarMensaje("Seleccionar una opcion valida", "vector")
+            const vector = document.getElementById('vector-type');
+            const vectorValue = vector.value;
+            if(vectorValue === ""){
+                mostrarMensaje("Seleccionar una opción válida", "vector");
+                return false;
             }else{
-                ocultarMensaje("vector")
+                ocultarMensaje("vector");
+                return true;
             }
         }
+
         function validarCaracteristicas(){
-            const feature = document.getElementById('feature-type')
-            const featureValue = feature.value
-
-            if(featureValue == ""){
-                mostrarMensaje("Seleccionar una opcion valida", "feature")
+            const feature = document.getElementById('feature-type');
+            const featureValue = feature.value;
+            if(featureValue === ""){
+                mostrarMensaje("Seleccionar una opción válida", "feature");
+                return false;
             }else{
-                ocultarMensaje("feature")
+                ocultarMensaje("feature");
+                return true;
             }
         }
+
         function validarElemento(){
-            const element = document.getElementById('compare-element')
-            const elementValue = element.value
-
-            if(elementValue == ""){
-                mostrarMensaje("Seleccionar una opcion valida", "element")
+            const element = document.getElementById('compare-element');
+            const elementValue = element.value;
+            if(elementValue === ""){
+                mostrarMensaje("Seleccionar una opción válida", "element");
+                return false;
             }else{
-                ocultarMensaje("element")
+                ocultarMensaje("element");
+                return true;
             }
         }
-        function validarFormulario(){
-            e
+
+        function validarFormularioCorpus(event){
+            if(!validarArchivoCorpus()){
+                event.preventDefault();
+            }
+        }
+
+        function validarFormulario(event){
+            if(!validarArchivoTest() || !validarVectorizacion() || !validarCaracteristicas() || !validarElemento()){
+                event.preventDefault();
+            }
         }
     </script>
 </body>
