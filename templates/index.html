@@ -134,8 +134,8 @@
             <!-- Subida de corpus normalizado (corpus)-->
         <form action="/vectorizar" method="POST" enctype="multipart/form-data" onsubmit="validarFormularioCorpus(event)">
             <div class="form-group-vector">
-                <label for="file-input-corpus">Corpus normalizado (csv):</label>
                 <input type="file" id="file-input-corpus" name="file-input-corpus" accept=".csv" required onblur="validarArchivoCorpus()">
+                <label for="file-input-corpus">Corpus normalizado (csv):</label>
                 <!-- <span id="error-file-corpus" class="error"></span> -->
                 <button type="submit">Vectorizar</button>
             </div>
@@ -152,7 +152,7 @@
             <!-- Selección de vectorización -->
             <div class="form-group">
                 <label for="vector-type">Seleccionar tipo de vectorización:</label>
-                <select id="vector-type" required onblur="validarVectorizacion()">
+                <select id="vector-type" name="vector-type" required onblur="validarVectorizacion()">
                     <option value="">Seleccione una opción</option>
                     <option value="tfidf">TF-IDF</option>
                     <option value="frecuencia">Frecuencia</option>
@@ -164,7 +164,7 @@
             <!-- Selección de características -->
             <div class="form-group">
                 <label for="feature-type">Seleccionar características a extraer:</label>
-                <select id="feature-type" required onblur="validarCaracteristicas()">
+                <select id="feature-type" name="feature-type" required onblur="validarCaracteristicas()">
                     <option value="">Seleccione una opción</option>
                     <option value="unigramas">Unigramas</option>
                     <option value="bigramas">Bigramas</option>
@@ -175,7 +175,7 @@
             <!-- Selección de elemento a comparar -->
             <div class="form-group">
                 <label for="compare-element">Seleccionar elemento a comparar:</label>
-                <select id="compare-element" required onblur="validarElemento()">
+                <select id="compare-element" name="compare-element" required onblur="validarElemento()">
                     <option value="">Seleccione una opción</option>
                     <option value="titulo">Título</option>
                     <option value="contenido">Contenido</option>
@@ -296,8 +296,5 @@
             }
         });
     </script>
-    
-    
-    
 </body>
 </html>
