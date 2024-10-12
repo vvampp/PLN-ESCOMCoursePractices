@@ -1,8 +1,8 @@
 from flask import Flask, request, render_template, redirect, url_for, flash
 import os
 import pandas as pd
-from vectorization import main
-from normalizer import procesar_csv
+from vectorization import vectorizeAll
+from normalization import normalize
 
 app = Flask(__name__, template_folder='../templates')
 
@@ -30,7 +30,7 @@ def vectorizeAPI():
 
                 df = pd.read_csv(filepath, sep='\t')
 
-                main(df)
+                vectorizeAll(df)
 
                 os.remove(filepath)
 
@@ -65,7 +65,8 @@ def analizar_documento():
             if file and file.filename.endswith('.csv'):
                 filepath = os.path.join(app.config['UPLOAD_FOLDER'], file.filename)
                 file.save(filepath) 
-                procesar_csv(filepath)
+                normalize(filepath)
+                os.remove(filepath)
 
                 flash('Normalización completada exitosamente.', 'message')
                 return redirect(url_for('home')) 

@@ -43,7 +43,7 @@ def tfidfBiVectorize(corpus):
 
 
 
-def main(source_file):
+def vectorizeAll(source_file):
 
     titleCorpus = source_file['Title'].tolist()
     contentCorpus = source_file['Content'].tolist()
