@@ -1,6 +1,8 @@
 from flask import Flask, request, render_template, redirect, url_for, flash
 import os
 import pandas as pd
+
+from backend.analyzer import vectorizeTest, cosine_similarity
 from vectorization import vectorizeAll
 from normalization import normalize
 
@@ -34,7 +36,7 @@ def vectorizeAPI():
 
                 os.remove(filepath)
 
-                flash('Vectorización completada exitosamente.')
+                flash('Vectorización del corpus completada exitosamente.')
                 return redirect(url_for('home'))
             else:
                 flash('El archivo debe ser un CSV.', 'error')
@@ -43,8 +45,6 @@ def vectorizeAPI():
         except Exception as e:
             flash(f'Ocurrió un error durante la vectorización: {str(e)}', 'error')
             return redirect(url_for('home'))
-
-        return redirect(url_for('home'))
 
     return render_template('index.html')
 
@@ -66,9 +66,23 @@ def analizar_documento():
                 filepath = os.path.join(app.config['UPLOAD_FOLDER'], file.filename)
                 file.save(filepath) 
                 normalize(filepath)
+
+                # Recuperar datos del formulario
+                # vector_type = request.form['vector-type'] # freq, binarizado, tfidf
+                # feature_type = request.form['feature-type'] # uni, bi
+                # compare_element = request.form['compare-element'] # titulo, contenido, titulo y contenido
+                #
+                # print("Recibido:", vector_type, feature_type, compare_element)
+                #
+                # # Llamar a la función de análisis para guardar el archivo test normalizado con las características seleccionadas
+                # vectorizeTest(filepath, vector_type, feature_type, compare_element)
+
+                # Aplicar similutud de coseno al archivo test con el corpus
+                # cosine_similarity(filepath, vector_type, feature_type, compare_element)
+
                 os.remove(filepath)
 
-                flash('Normalización completada exitosamente.', 'message')
+                flash('Normalización y vectorización del archivo test completada exitosamente.', 'message')
                 return redirect(url_for('home')) 
             else:
                 flash('El archivo debe ser un CSV.', 'error')

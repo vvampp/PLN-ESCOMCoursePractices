@@ -1,7 +1,5 @@
-import pandas as pd
 from sklearn.feature_extraction.text import CountVectorizer
 from sklearn.feature_extraction.text import TfidfVectorizer
-import numpy as np
 import os.path
 import pickle
 from itertools import zip_longest

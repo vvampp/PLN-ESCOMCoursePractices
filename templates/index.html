@@ -134,8 +134,8 @@
             <!-- Subida de corpus normalizado (corpus)-->
         <form action="/vectorizar" method="POST" enctype="multipart/form-data" onsubmit="validarFormularioCorpus(event)">
             <div class="form-group-vector">
-                <input type="file" id="file-input-corpus" name="file-input-corpus" accept=".csv" required onblur="validarArchivoCorpus()">
                 <label for="file-input-corpus">Corpus normalizado (csv):</label>
+                <input type="file" id="file-input-corpus" name="file-input-corpus" accept=".csv" required onblur="validarArchivoCorpus()">
                 <!-- <span id="error-file-corpus" class="error"></span> -->
                 <button type="submit">Vectorizar</button>
             </div>

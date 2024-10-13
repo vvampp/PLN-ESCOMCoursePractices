@@ -4,6 +4,7 @@ from itertools import zip_longest
 from sklearn.feature_extraction.text import CountVectorizer
 from sklearn.feature_extraction.text import TfidfVectorizer
 import pandas as pd
+import math
 
 
 # Unigramas
@@ -38,22 +39,47 @@ def tfidfBiVectorize(test):
     Y = tfidf_vectorizator_bi.transform(test)
     return Y
 
+def cosine(x, y):
+	val = sum(x[index] * y[index] for index in range(len(x)))
+	sr_x = math.sqrt(sum(x_val**2 for x_val in x))
+	sr_y = math.sqrt(sum(y_val**2 for y_val in y))
+	res = val/(sr_x*sr_y)
+	return (res)
 
+def cosine_similarity(test_vector, vector_type, feature_type, compare_element):
+    # Recuperar el test
+    try:
+        with open(test_vector, 'rb') as file:
+            test = pickle.load(file)
+    except Exception as e:
+        print(f"An exception ocurred: {e}")
+
+
+    # Recuperar el corpus con base en el elemento a comparar
+    if (compare_element == 'titulo'):
+        print("Comparar por titulo")
+    elif (compare_element == 'contenido'):
+        print("Comparar por contenido")
+    else:
+        print("Comparar por titulo y contenido")
 
 def vectorizeTest(test_csv_file,compare_element, vector_type, feature_type):
     # alimentar funcion con archivo directamente (tests)
-    # test_csv_file = 'prueba.csv'
+    test_csv_file = 'prueba.csv'
+
+    print("Vectorizando test...")
     try:
         source_file = pd.read_csv(test_csv_file,sep='\t')
     except Exception as e:
         print(f"An exception ocurred: {e}")
 
     # valores para realizar tests
-    # compare_element = 'tyc'
-    # vector_type = 'freq'
-    # feature_type = 'bi'
+    compare_element = 'tyc'
+    vector_type = 'freq'
+    feature_type = 'bi'
     
     # Recuperar el test con base en el elemento a comparar
+    print("Recuperando test...")
     if(compare_element == 'titulo'):
         print("Comparar por titulo")
         test = source_file['Title'].tolist()
@@ -69,6 +95,8 @@ def vectorizeTest(test_csv_file,compare_element, vector_type, feature_type):
                        zip_longest(titletest, contenttest, fillvalue="")]
 
 
+    # Unigramas
+    print("Determinando unigramas/bigramas...")
     vectorizer_map = {
         ('freq', 'uni'): CountVectorizer(),
         ('onehot', 'uni'): CountVectorizer(binary=True),
@@ -79,6 +107,7 @@ def vectorizeTest(test_csv_file,compare_element, vector_type, feature_type):
     }
 
     # Selección de la función de vectorización
+    print("Vectorizando...")
     try:
         vectorizer = vectorizer_map[(vector_type, feature_type)]
     except KeyError:
@@ -86,6 +115,8 @@ def vectorizeTest(test_csv_file,compare_element, vector_type, feature_type):
     
     Y = vectorizer.fit_transform(test)
 
+    # Guardar vectorización de test
+    print("Guardando vectorización de test...")
     output_folder = os.path.join(os.getcwd(), 'vectorized_test')    # si se prueba directamente, el folder se crea en el workning dir, y no en backend
     os.makedirs(output_folder, exist_ok=True)
     filename = f'test_{compare_element}_{vector_type}_{feature_type}.pkl'
@@ -93,10 +124,6 @@ def vectorizeTest(test_csv_file,compare_element, vector_type, feature_type):
     with open(filepath, 'wb') as file:
         pickle.dump(Y, file)
     print(f'Vectorización de test guardado: {filename}')
-
-# Renombrar a vectorizeTest "main" para hacer pruebas
-# if __name__ == "__main__":
-#     main()
 
 
 # QUIZÁS HAGA FALTA IMPEMENTAR QUE SE BORREN LOS CONTENIDOS DE LA CARPETA DE vectorized_test PARA NO DAR ERRORES
