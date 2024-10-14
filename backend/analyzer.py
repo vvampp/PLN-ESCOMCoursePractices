@@ -70,15 +70,14 @@ def main():
     try:
         with open(test_txt_file, 'r') as file:
             test_file_content = file.read().rstrip() 
-            test = list(test_file_content.split(" "))
-            print(test)
+            print(test_file_content)
     except Exception as e:
         print(f"An exception ocurred: {e}")
 
     # valores para realizar tests
     compare_element = 'tyc'
     vector_type = 'freq'
-    feature_type = 'bi'
+    feature_type = 'uni'
     
     # Recuperar el test con base en el elemento a comparar
     # NO NECESARIO SI EL FORMATO DE TEST.TXT SOLO CONTIENE EL CONTENIDO DE LA NOTICIA
@@ -100,7 +99,6 @@ def main():
 
 
     # Unigramas
-    print("Determinando unigramas/bigramas...")
     vectorizer_map = {
         ('freq', 'uni'): CountVectorizer(),
         ('onehot', 'uni'): CountVectorizer(binary=True),
