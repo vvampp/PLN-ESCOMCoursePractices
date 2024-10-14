@@ -3,8 +3,8 @@ import os
 import pandas as pd
 
 # from backend.analyzer import vectorizeTest, cosine_similarity
-from vectorization import vectorizeAll
-from normalization import normalize
+from corpusVectorization import vectorizeAll
+from testNormalization import normalize
 
 app = Flask(__name__, template_folder='../templates')
 

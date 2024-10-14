@@ -7,6 +7,7 @@ import pandas as pd
 import math
 
 
+
 # Unigramas
 def freqUniVectorize(test):
     freq_vectorizator_uni = CountVectorizer()
@@ -65,18 +66,19 @@ def cosine_similarity(test_vector, vector_type, feature_type, compare_element):
 
 def main():
     # alimentar funcion con archivo directamente (tests)
-    test_txt_file = 'test.txt'
+    test_txt_file = 'normalized_test.txt'
 
     try:
         with open(test_txt_file, 'r') as file:
-            test_file_content = file.read().rstrip() 
+            test_file_content = file.read().rstrip()
+            test = list(test_file_content.split(" "))
             print(test_file_content)
     except Exception as e:
         print(f"An exception ocurred: {e}")
 
     # valores para realizar tests
     compare_element = 'tyc'
-    vector_type = 'freq'
+    vector_type = 'tfidf'
     feature_type = 'uni'
     
     # Recuperar el test con base en el elemento a comparar
