@@ -63,13 +63,15 @@ def cosine_similarity(test_vector, vector_type, feature_type, compare_element):
     else:
         print("Comparar por titulo y contenido")
 
-def vectorizeTest(test_csv_file,compare_element, vector_type, feature_type):
+def main():
     # alimentar funcion con archivo directamente (tests)
-    test_csv_file = 'prueba.csv'
+    test_txt_file = 'test.txt'
 
-    print("Vectorizando test...")
     try:
-        source_file = pd.read_csv(test_csv_file,sep='\t')
+        with open(test_txt_file, 'r') as file:
+            test_file_content = file.read().rstrip() 
+            test = list(test_file_content.split(" "))
+            print(test)
     except Exception as e:
         print(f"An exception ocurred: {e}")
 
@@ -79,20 +81,22 @@ def vectorizeTest(test_csv_file,compare_element, vector_type, feature_type):
     feature_type = 'bi'
     
     # Recuperar el test con base en el elemento a comparar
-    print("Recuperando test...")
-    if(compare_element == 'titulo'):
-        print("Comparar por titulo")
-        test = source_file['Title'].tolist()
+    # NO NECESARIO SI EL FORMATO DE TEST.TXT SOLO CONTIENE EL CONTENIDO DE LA NOTICIA
 
-    elif(compare_element == 'contenido'):
-        print("Comparar por contenido")
-        test = source_file['Content'].tolist()
-    else:
-        print("Comparar por titulo y contenido")
-        titletest = source_file['Title'].tolist()
-        contenttest = source_file['Content'].tolist()
-        test = [itemT + " " + (itemC if itemC is not None else "") for itemT, itemC in
-                       zip_longest(titletest, contenttest, fillvalue="")]
+    # print("Recuperando test...")
+    # if(compare_element == 'titulo'):
+    #     print("Comparar por titulo")
+    #     test = source_file_content['Title'].tolist()
+
+    # elif(compare_element == 'contenido'):
+    #     print("Comparar por contenido")
+    #     test = source_file_content['Content'].tolist()
+    # else:
+    #     print("Comparar por titulo y contenido")
+    #     titletest = source_file_content['Title'].tolist()
+    #     contenttest = source_file_content['Content'].tolist()
+    #     test = [itemT + " " + (itemC if itemC is not None else "") for itemT, itemC in
+    #                    zip_longest(titletest, contenttest, fillvalue="")]
 
 
     # Unigramas
@@ -107,13 +111,16 @@ def vectorizeTest(test_csv_file,compare_element, vector_type, feature_type):
     }
 
     # Selección de la función de vectorización
-    print("Vectorizando...")
+    
     try:
         vectorizer = vectorizer_map[(vector_type, feature_type)]
+        print("Vectorizando...")
     except KeyError:
         raise ValueError(f'Tipo de vectorización o característica no reconocidos: {vector_type}, {feature_type}')
     
     Y = vectorizer.fit_transform(test)
+
+    print (type(Y.toarray))
 
     # Guardar vectorización de test
     print("Guardando vectorización de test...")
@@ -124,6 +131,10 @@ def vectorizeTest(test_csv_file,compare_element, vector_type, feature_type):
     with open(filepath, 'wb') as file:
         pickle.dump(Y, file)
     print(f'Vectorización de test guardado: {filename}')
+
+
+if __name__ == "__main__":
+    main()
 
 
 # QUIZÁS HAGA FALTA IMPEMENTAR QUE SE BORREN LOS CONTENIDOS DE LA CARPETA DE vectorized_test PARA NO DAR ERRORES

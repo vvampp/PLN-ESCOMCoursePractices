@@ -2,7 +2,7 @@ from flask import Flask, request, render_template, redirect, url_for, flash
 import os
 import pandas as pd
 
-from backend.analyzer import vectorizeTest, cosine_similarity
+# from backend.analyzer import vectorizeTest, cosine_similarity
 from vectorization import vectorizeAll
 from normalization import normalize
 
@@ -62,7 +62,7 @@ def analizar_documento():
                 flash("No se seleccionó ningún archivo", "error")
                 return redirect(url_for('home'))
 
-            if file and file.filename.endswith('.csv'):
+            if file and file.filename.endswith('.txt'):
                 filepath = os.path.join(app.config['UPLOAD_FOLDER'], file.filename)
                 file.save(filepath) 
                 normalize(filepath)
