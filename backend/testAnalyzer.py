@@ -34,6 +34,8 @@ def load_vectorizer(compare_element, vector_type, feature_type):
     
     return vectorizer
 
+
+
 def load_vectorized_corpus(compare_element, vector_type, feature_type):
     filename = f'{compare_element}_{vector_type}_{feature_type}.pkl'
 
@@ -60,8 +62,9 @@ def cosineSimilarity (test_vector, corpus_matrix):
 
 
 
-def main():
-    test_txt_file = 'test.txt'
+def testAnalyzer(test_txt_file,compare_element,vector_type,feature_type):
+    # test_txt_file = 'test.txt'
+    # print(compare_element,vector_type,feature_type)
 
     try:
         with open(test_txt_file, 'r') as file:
@@ -71,18 +74,16 @@ def main():
 
     normalized_test = normalizeTest(test_file_content)
     normalized_test = [normalized_test]
-    
+
     #print(normalized_test)
 
-
     # Parámetros
-    compare_element = 'content'  # 'title', 'content', 'tyc'
-    vector_type = 'onehot'    # 'freq', 'onehot', 'tfidf'
-    feature_type = 'uni'     # 'uni', 'bi'
+    # compare_element = 'content'  # 'title', 'content', 'tyc'
+    # vector_type = 'onehot'    # 'freq', 'onehot', 'tfidf'
+    # feature_type = 'uni'     # 'uni', 'bi'
 
 
     vectorizer = load_vectorizer(compare_element, vector_type, feature_type) 
-    #print(vectorizer)
     vectorized_test = vectorizer.transform(normalized_test)
     #print(vectorized_test)
 
@@ -91,10 +92,7 @@ def main():
 
     top_10_index, top_10_similarities = cosineSimilarity(vectorized_test,corpus_matrix)
 
-    # for debbuging
+    # para debbuging
     for idx, similarity in zip (top_10_index, top_10_similarities):
         print(f'Documento {idx} - Similitud coseno: {similarity:.5f}')
     
-
-if __name__ == "__main__":
-    main()

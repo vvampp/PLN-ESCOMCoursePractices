@@ -4,7 +4,7 @@ import pandas as pd
 
 # from backend.analyzer import vectorizeTest, cosine_similarity
 from corpusVectorization import vectorizeAll
-from testAnalyzer import main       # testAnalyzer(test.txt,compare_element,vector_type,feature_type) -> NORMALIZACIÓN -> VECTORIZACIÓN DINÁMICA
+from testAnalyzer import testAnalyzer      # testAnalyzer(test.txt,compare_element,vector_type,feature_type) -> NORMALIZACIÓN -> VECTORIZACIÓN DINÁMICA
 
 app = Flask(__name__, template_folder='../templates')
 
@@ -66,26 +66,18 @@ def analizar_documento():
                 filepath = os.path.join(app.config['UPLOAD_FOLDER'], file.filename)
                 file.save(filepath) 
 
-                ### IMPLEMENTAR LLAMADA A testAnalyzer que por ahora es main en testAnalyzer.py
+                # obtener parámetors
+                vector_type = request.form.get('vector-type')
+                feature_type = request.form.get('feature-type')
+                compare_element = request.form.get('compare-element')
 
-                        # main(filepath)
+                if not all ([vector_type, feature_type, compare_element]):
+                    flash("Campos en el formulario faltantes", "error")
+                    return redirect(url_for('home'))
+                
+                testAnalyzer ( test_txt_file = filepath, vector_type=vector_type, feature_type=feature_type, compare_element=compare_element)
 
-                # Recuperar datos del formulario
-                # vector_type = request.form['vector-type'] # freq, binarizado, tfidf
-                # feature_type = request.form['feature-type'] # uni, bi
-                # compare_element = request.form['compare-element'] # titulo, contenido, titulo y contenido
-                #
-                # print("Recibido:", vector_type, feature_type, compare_element)
-                #
-                # # Llamar a la función de análisis para guardar el archivo test normalizado con las características seleccionadas
-                # vectorizeTest(filepath, vector_type, feature_type, compare_element)
-
-                # Aplicar similutud de coseno al archivo test con el corpus
-                # cosine_similarity(filepath, vector_type, feature_type, compare_element)
-
-                os.remove(filepath)
-
-                flash('Normalización y vectorización del archivo test completada exitosamente.', 'message')
+                flash('Proceso completado existosamente, revisar consola', 'message')
                 return redirect(url_for('home')) 
             else:
                 flash('El archivo debe ser un CSV.', 'error')
