@@ -1,7 +1,7 @@
 import os.path
 import pickle
-from sklearn.feature_extraction.text import CountVectorizer
-from sklearn.feature_extraction.text import TfidfVectorizer
+import numpy as np
+from sklearn.metrics.pairwise import cosine_similarity
 import spacy
 
 
@@ -33,7 +33,32 @@ def load_vectorizer(compare_element, vector_type, feature_type):
         raise FileNotFoundError(f'El archivo del vectorizador buscado no existe: {vectorizer_filepath}')
     
     return vectorizer
-        
+
+def load_vectorized_corpus(compare_element, vector_type, feature_type):
+    filename = f'{compare_element}_{vector_type}_{feature_type}.pkl'
+
+    vectorized_corpus_folder = os.path.join(os.getcwd(), 'vectorized_data')
+    vectorized_corups_filepath = os.path.join(vectorized_corpus_folder,filename)
+    if os.path.exists(vectorized_corups_filepath):
+        with open(vectorized_corups_filepath, 'rb') as file:
+            vectorized_corpus = pickle.load(file)
+            print(filename)
+    else:
+        raise FileNotFoundError(f'La matriz de corpus buscada no existe: {filename}')
+    
+    return vectorized_corpus
+
+
+def cosineSimilarity (test_vector, corpus_matrix):
+    cosine_similarities = cosine_similarity(test_vector,corpus_matrix)
+
+    cosine_similarities = cosine_similarities[0] 
+
+    top_10_index = np.argsort(cosine_similarities)[-10:][::-1]
+    
+    return top_10_index, cosine_similarities[top_10_index]
+
+
 
 def main():
     test_txt_file = 'test.txt'
@@ -46,22 +71,29 @@ def main():
 
     normalized_test = normalizeTest(test_file_content)
     normalized_test = [normalized_test]
-    print(normalized_test)
+    
+    #print(normalized_test)
 
 
     # Parámetros
-    compare_element = 'tyc'  # 'title', 'content', 'tyc'
-    vector_type = 'tfidf'    # 'freq', 'onehot', 'tfidf'
+    compare_element = 'content'  # 'title', 'content', 'tyc'
+    vector_type = 'onehot'    # 'freq', 'onehot', 'tfidf'
     feature_type = 'uni'     # 'uni', 'bi'
 
-    vectorizer = load_vectorizer(compare_element, vector_type, feature_type)
 
-    
-    print(vectorizer)
-
+    vectorizer = load_vectorizer(compare_element, vector_type, feature_type) 
+    #print(vectorizer)
     vectorized_test = vectorizer.transform(normalized_test)
+    #print(vectorized_test)
 
-    print(vectorized_test)
+    corpus_matrix = load_vectorized_corpus(compare_element,vector_type,feature_type)
+
+
+    top_10_index, top_10_similarities = cosineSimilarity(vectorized_test,corpus_matrix)
+
+    # for debbuging
+    for idx, similarity in zip (top_10_index, top_10_similarities):
+        print(f'Documento {idx} - Similitud coseno: {similarity:.5f}')
     
 
 if __name__ == "__main__":
