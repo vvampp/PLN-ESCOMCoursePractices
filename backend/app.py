@@ -4,8 +4,7 @@ import pandas as pd
 
 # from backend.analyzer import vectorizeTest, cosine_similarity
 from corpusVectorization import vectorizeAll
-from testAnalyzer import testAnalyzer      # testAnalyzer(test.txt,compare_element,vector_type,feature_type) -> NORMALIZACIÓN -> VECTORIZACIÓN DINÁMICA
-
+from testAnalyzer import testAnalyzer     
 app = Flask(__name__, template_folder='../templates')
 
 app.secret_key = 'your_secret_key'  
