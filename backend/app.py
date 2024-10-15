@@ -4,7 +4,7 @@ import pandas as pd
 
 # from backend.analyzer import vectorizeTest, cosine_similarity
 from corpusVectorization import vectorizeAll
-from testNormalization import normalize
+from testAnalyzer import main       # testAnalyzer(test.txt,compare_element,vector_type,feature_type) -> NORMALIZACIÓN -> VECTORIZACIÓN DINÁMICA
 
 app = Flask(__name__, template_folder='../templates')
 
@@ -65,7 +65,10 @@ def analizar_documento():
             if file and file.filename.endswith('.txt'):
                 filepath = os.path.join(app.config['UPLOAD_FOLDER'], file.filename)
                 file.save(filepath) 
-                normalize(filepath)
+
+                ### IMPLEMENTAR LLAMADA A testAnalyzer que por ahora es main en testAnalyzer.py
+
+                        # main(filepath)
 
                 # Recuperar datos del formulario
                 # vector_type = request.form['vector-type'] # freq, binarizado, tfidf
