@@ -134,9 +134,9 @@
                 <label for="compare-element">Elemento a comparar:</label>
                 <select id="compare-element" name="compare-element" required onblur="validarElemento()">
                     <option value="">Seleccione una opción</option>
-                    <option value="title">Titulo</option>
-                    <option value="content">Conenido</option>
-                    <option value="tyc">Título + Contenido (TyC)</option>
+                    <option value="title" {% if compare_element == 'title' %}selected{% endif %}>Titulo</option>
+                    <option value="content" {% if compare_element == 'content' %}selected{% endif %}>Contenido</option>
+                    <option value="tyc" {% if compare_element == 'tyc' %}selected{% endif %}>Título + Contenido (TyC)</option>
                 </select>
                 <span id="error-element" class="error"></span>
             </div>
@@ -145,9 +145,9 @@
                 <label for="vector-type">Tipo de vectorización:</label>
                 <select id="vector-type" name="vector-type" required onblur="validarVectorizacion()">
                     <option value="">Seleccione una opción</option>
-                    <option value="freq">Frecuencia</option>
-                    <option value="oneHot">OneHot</option>
-                    <option value="tfidf">TF-IDF</option>                    
+                    <option value="freq" {% if vector_type == 'freq' %}selected{% endif %}>Frecuencia</option>
+                    <option value="oneHot" {% if vector_type == 'oneHot' %}selected{% endif %}>OneHot</option>
+                    <option value="tfidf" {% if vector_type == 'tfidf' %}selected{% endif %}>TF-IDF</option>
                 </select>
                 <span id="error-vector" class="error"></span>
             </div>
@@ -156,8 +156,8 @@
                 <label for="feature-type">Característica a extraer:</label>
                 <select id="feature-type" name="feature-type" required onblur="validarCaracteristicas()">
                     <option value="">Seleccione una opción</option>
-                    <option value="uni">Unigramas</option>
-                    <option value="bi">Bigramas</option>
+                    <option value="uni" {% if feature_type == 'uni' %}selected{% endif %}>Unigramas</option>
+                    <option value="bi" {% if feature_type == 'bi' %}selected{% endif %}>Bigramas</option>
                 </select>
                 <span id="error-feature" class="error"></span>
             </div>

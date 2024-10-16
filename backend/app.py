@@ -2,6 +2,7 @@ from flask import Flask, request, render_template, redirect, url_for, flash
 import os
 import pandas as pd
 
+
 # from backend.analyzer import vectorizeTest, cosine_similarity
 from corpusVectorization import vectorizeAll
 from testAnalyzer import testAnalyzer     
@@ -36,7 +37,8 @@ def vectorizeAPI():
                 os.remove(filepath)
 
                 flash('Vectorización del corpus completada exitosamente.')
-                return redirect(url_for('home'))
+                return render_template('index.html', vector_type='', feature_type='', compare_element='')
+                #return redirect(url_for('home'))
             else:
                 flash('El archivo debe ser un CSV.', 'error')
                 return redirect(url_for('home'))
@@ -77,7 +79,8 @@ def analizar_documento():
                 testAnalyzer ( test_txt_file = filepath, vector_type=vector_type, feature_type=feature_type, compare_element=compare_element)
 
                 flash('Proceso completado existosamente, revisar consola', 'message')
-                return redirect(url_for('home')) 
+                #return redirect(url_for('home'))
+                return render_template('index.html', vector_type=vector_type, feature_type=feature_type, compare_element=compare_element)
             else:
                 flash('El archivo debe ser un CSV.', 'error')
                 return redirect(url_for('home')) 
