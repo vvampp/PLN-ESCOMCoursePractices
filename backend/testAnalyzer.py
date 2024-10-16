@@ -96,8 +96,8 @@ def testAnalyzer(test_txt_file,compare_element,vector_type,feature_type):
     i = 1
     # para debbuging
     for idx, similarity in zip (top_10_index, top_10_similarities):
-        print(f'Documento {idx} - Similitud coseno: {similarity:.5f}')
-        document_similarity.append((f'Top {i}: Document: {idx}', f'Similitud coseno: {similarity:.5f}'))
+        print(f'Documento {idx} - Similitud: {similarity:.5f}')
+        document_similarity.append((f'{i}: Indice de documento: {idx}', f'Similitud: {similarity:.5f}'))
         i += 1
 
     return document_similarity
