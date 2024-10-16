@@ -94,5 +94,5 @@ def testAnalyzer(test_txt_file,compare_element,vector_type,feature_type):
 
     # para debbuging
     for idx, similarity in zip (top_10_index, top_10_similarities):
-        print(f'Documento {idx} - Similitud coseno: {similarity:.5f}')
+        print(f'Documento {idx}: {similarity:.5f}')
     
