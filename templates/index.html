@@ -107,36 +107,50 @@
             font-weight: bold;
         }
         .results-container {
-            margin-top: 20px;
-            background-color: #f9f9f9;
+            margin-top: 30px;
+            background-color: #f0f4f8;
             padding: 20px;
-            border-radius: 10px;
-            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+            border-radius: 15px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
             text-align: center;
         }
 
         .results-title {
             color: #007bff;
+            font-size: 1.8em;
             font-weight: bold;
-            margin-bottom: 15px;
+            margin-bottom: 20px;
+            border-bottom: 2px solid #007bff;
+            padding-bottom: 10px;
         }
 
-        .list-group-item {
-            background-color: #e9ecef;
-            border: none;
-            padding: 15px;
+        .results-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+        }
+
+        .results-table thead {
+            background-color: #007bff;
+            color: white;
+        }
+
+        .results-table th, .results-table td {
+            padding: 12px 15px;
+            border: 1px solid #ddd;
+            text-align: center;
             font-size: 16px;
-            border-radius: 5px;
-            margin-bottom: 10px;
         }
 
-        .list-group-item:nth-child(odd) {
-            background-color: #f1f1f1;
+        .results-table tbody tr:nth-child(even) {
+            background-color: #f8f9fa;
         }
 
-        .list-group-item:last-child {
-            margin-bottom: 0;
+        .results-table tbody tr:hover {
+            background-color: #e2e6ea;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15);
         }
+
     </style>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 </head>
@@ -203,11 +217,24 @@
     {% if results %}
     <div class="container results-container">
         <h2 class="results-title">Resultados del análisis</h2>
-            <ul class="list-group">
+        <table class="results-table">
+            <thead>
+                <tr>
+                    <th>Posición</th>
+                    <th>Índice de Documento</th>
+                    <th>Similitud</th>
+                </tr>
+            </thead>
+            <tbody>
                 {% for result in results %}
-                <li class="list-group-item">{{ result }}</li>
+                <tr>
+                    <td>{{loop.index }}</td>
+                    <td>{{ result[0].split(': ')[2] }}</td>
+                    <td>{{ result[1].split(': ')[1] }}</td>
+                </tr>
                 {% endfor %}
-            </ul>
+            </tbody>
+        </table>
     </div>
     {% endif %}
 
@@ -297,5 +324,6 @@
                 flashMessages.forEach(function(message) {
                     console.log(message)
                     Swal.fire({
-                        icon: message[0] === 'message' ? 'success' : 'error', title: message[1] }); }); } }); </script>
+                        icon: message[0] === 'message' ? 'success' : 'error', title: message[1] }); }); } });
+    </script>
 </body></html>

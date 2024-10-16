@@ -81,7 +81,7 @@ def analizar_documento():
                                                      compare_element=compare_element,
                                                      )
                 os.remove(filepath)
-                flash('Proceso completado existosamente, revisar consola', 'message')
+                flash('Proceso completado existosamente', 'message')
                 return render_template('index.html',
                                        vector_type=vector_type,
                                        feature_type=feature_type,
