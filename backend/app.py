@@ -80,7 +80,7 @@ def analizar_documento():
                                                      feature_type=feature_type,
                                                      compare_element=compare_element,
                                                      )
-
+                os.remove(filepath)
                 flash('Proceso completado existosamente, revisar consola', 'message')
                 return render_template('index.html',
                                        vector_type=vector_type,
@@ -88,6 +88,7 @@ def analizar_documento():
                                        compare_element=compare_element,
                                        results=document_similarity
                                        )
+                
             else:
                 flash('El archivo debe ser un CSV.', 'error')
                 return redirect(url_for('home')) 

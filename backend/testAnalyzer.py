@@ -85,7 +85,7 @@ def testAnalyzer(test_txt_file,compare_element,vector_type,feature_type):
 
     vectorizer = load_vectorizer(compare_element, vector_type, feature_type) 
     vectorized_test = vectorizer.transform(normalized_test)
-    #print(vectorized_test)
+    print(vectorized_test)
 
     corpus_matrix = load_vectorized_corpus(compare_element,vector_type,feature_type)
 
