@@ -92,7 +92,12 @@ def testAnalyzer(test_txt_file,compare_element,vector_type,feature_type):
 
     top_10_index, top_10_similarities = cosineSimilarity(vectorized_test,corpus_matrix)
 
+    document_similarity = []
+    i = 1
     # para debbuging
     for idx, similarity in zip (top_10_index, top_10_similarities):
         print(f'Documento {idx} - Similitud coseno: {similarity:.5f}')
-    
+        document_similarity.append((f'Top {i}: Document: {idx}', f'Similitud coseno: {similarity:.5f}'))
+        i += 1
+
+    return document_similarity
