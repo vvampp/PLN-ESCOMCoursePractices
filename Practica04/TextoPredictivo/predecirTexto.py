@@ -33,7 +33,8 @@ def bigramPrediction(model,ngramStart):
         indexes = searchBigram(model,ngramStart)
         nextWord = []
         for index in indexes:
-            nextWord.append(model['Term 2'].iloc[index])
+            if(model['Term 2'].iloc[index] != '#'):
+                nextWord.append(model['Term 2'].iloc[index])
         nextWord.append(".")
         print(nextWord)
         choice = int(input())
@@ -47,7 +48,8 @@ def trigramPrediction(model,ngramStart):
         indexes,nextT1 = searchTrigram(model,ngramStart)
         nextWord = []
         for index in indexes:
-            nextWord.append(model['Term 3'].iloc[index])
+            if(model['Term 3'].iloc[index] != '#'):
+                nextWord.append(model['Term 3'].iloc[index])
         nextWord.append(".")
         print(nextWord)
         choice = int(input())
@@ -60,8 +62,8 @@ def trigramPrediction(model,ngramStart):
 def main ():
     # Recibido desde front end 
     feature = 'bi'               # bi / tri
-    model_filename = 'bigram_language_model_bambino.tsv'          
-    ngramStart = 'soñé'
+    model_filename = 'bigram_language_model_adair.tsv'          
+    ngramStart = 'No'
 
     model = loadModel(model_filename)
 
