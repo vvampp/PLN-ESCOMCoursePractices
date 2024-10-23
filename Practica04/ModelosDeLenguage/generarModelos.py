@@ -9,7 +9,7 @@ nlp = spacy.load('es_core_news_sm')
 #nltk.download('punkt')
 
 def readChat():
-    txt_file = 'rawCorpusBambino.txt'
+    txt_file = 'rawCorpusAdair.txt'
     txt_folder = os.path.join(os.getcwd(), 'RawCorporea')
     txt_filepath = os.path.join(txt_folder,txt_file) 
 
@@ -24,14 +24,23 @@ def readChat():
     
 
 def extractMessages(raw_corpus):
-    pattern = r'\[\d{2}/\d{2}/\d{2}, \d{2}:\d{2}:\d{2}\] bambino: (.+)'
+    # pattern = r'\[\d{2}/\d{2}/\d{2}, \d{2}:\d{2}:\d{2}\] bambino: (.+)'
+    pattern = r'[\d\d?/\d\d?/\d\d, \d\d?:\d\d( PM| AM)] - AdairG: (.+)'
     messages = re.findall(pattern, raw_corpus)
-    filtered_messages = [mesage for mesage in messages if not re.search(r'\u200E',mesage) and not re.search( r'https?:\/\/(?:(?:(?:[A-Za-z0-9-])+\.))+(?:[A-Za-z]){2,}(?::\d{1,5})?(?:(?:\/(?:[\w\-\.~%])+)*)?(?:\?(?:(?:[\w\-\.~%])+=(?:[\w\-\.~%])*(?:&(?:[\w\-\.~%])+=(?:[\w\-\.~%])*)*)?)?(?:#(?:[\w\-\.~%\/\+\!\@\(\)\[\]\{\}]+))??', mesage)]
+    filtered_messages = [mesage for mesage in messages
+                         if not re.search(r'\u200E',mesage)
+                         and not re.search( r'https?://[A-Za-z0-9-]+\.+[A-Za-z]{2,}(?::\d{1,5})?(?:(?:/[\w\-\.~%]+)*)?(?:\?(?:[\w\-\.~%]+=[\w\-\.~%]*(?:&[\w\-\.~%]+=[\w\-.~%]*)*)?)?(?:#[\w\-.~%\/\+!\@\(\)\[\]\{\}]+)??', mesage)
+                        and not re.search(r'<Media omitted>', mesage)
+                         and not re.search(r'You deleted this message', mesage)
+                         and not re.search(r'null', mesage)
+                         and not re.search(r'file://(.+)', mesage)
+
+                         ]
     return filtered_messages
 
 
 def sentencize(messages):
-    destiny_tsv_file = 'tokenized_corpus_bambino.tsv'
+    destiny_tsv_file = 'tokenized_corpus_Adair.tsv'
     tsv_folder = os.path.join(os.getcwd(),'TokenizedCorporea')
     tsv_filepah = os.path.join(tsv_folder,destiny_tsv_file)
 
@@ -75,7 +84,7 @@ def calculateFrequency(sentencized_corpus):
     
 
 def calculateBigram(bigram_freq,unigram_freq,language_model_folder):
-    destiny_tsv_file = 'bigram_language_model_bambino.tsv'
+    destiny_tsv_file = 'bigram_language_model_adair.tsv'
     rows = []
     bigram_probabilities = {}
     for bigram in bigram_freq:
@@ -96,7 +105,7 @@ def calculateBigram(bigram_freq,unigram_freq,language_model_folder):
 
 
 def calculateTrigram(trigram_freq,bigram_freq,language_model_folder):
-    destiny_tsv_file = 'trigram_language_model_bambino.tsv'
+    destiny_tsv_file = 'trigram_language_model_adair.tsv'
     rows = []
     trigram_probabilities = {}
     for trigram in trigram_freq:
@@ -121,7 +130,7 @@ def main():
     messages = extractMessages(raw_corpus)
     sentencized_corpus = sentencize(messages)
     calculateFrequency(sentencized_corpus)
-    
+
 
 if __name__ == "__main__":
     main()
