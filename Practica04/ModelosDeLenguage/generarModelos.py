@@ -9,7 +9,7 @@ nlp = spacy.load('es_core_news_sm')
 #nltk.download('punkt')
 
 def readChat():
-    txt_file = 'rawCorpusAdair.txt'
+    txt_file = 'rawCorpusRojo.txt'
     txt_folder = os.path.join(os.getcwd(), 'RawCorporea')
     txt_filepath = os.path.join(txt_folder,txt_file) 
 
@@ -24,8 +24,9 @@ def readChat():
     
 
 def extractMessages(raw_corpus):
-    # pattern = r'\[\d{2}/\d{2}/\d{2}, \d{2}:\d{2}:\d{2}\] bambino: (.+)'
-    pattern = r'[\d\d?/\d\d?/\d\d, \d\d?:\d\d( PM| AM)] - AdairG: (.+)'
+    pattern = r'\[\d{2}/\d{2}/\d{2}, \d{1,2}:\d{2}:\d{2}(?:\s?[ap]\.m\.)?\] Rojo: (.+)' 
+
+    # pattern = r'[\d\d?/\d\d?/\d\d, \d\d?:\d\d( PM| AM)] - Adair: (.+)'
     messages = re.findall(pattern, raw_corpus)
     filtered_messages = [mesage for mesage in messages
                          if not re.search(r'\u200E',mesage)
@@ -40,7 +41,7 @@ def extractMessages(raw_corpus):
 
 
 def sentencize(messages):
-    destiny_tsv_file = 'tokenized_corpus_Adair.tsv'
+    destiny_tsv_file = 'tokenized_corpus_Rojo.tsv'
     tsv_folder = os.path.join(os.getcwd(),'TokenizedCorporea')
     tsv_filepah = os.path.join(tsv_folder,destiny_tsv_file)
 
@@ -84,7 +85,7 @@ def calculateFrequency(sentencized_corpus):
     
 
 def calculateBigram(bigram_freq,unigram_freq,language_model_folder):
-    destiny_tsv_file = 'bigram_language_model_adair.tsv'
+    destiny_tsv_file = 'bigram_language_model_Rojo.tsv'
     rows = []
     bigram_probabilities = {}
     for bigram in bigram_freq:
@@ -105,7 +106,7 @@ def calculateBigram(bigram_freq,unigram_freq,language_model_folder):
 
 
 def calculateTrigram(trigram_freq,bigram_freq,language_model_folder):
-    destiny_tsv_file = 'trigram_language_model_adair.tsv'
+    destiny_tsv_file = 'trigram_language_model_Rojo.tsv'
     rows = []
     trigram_probabilities = {}
     for trigram in trigram_freq:
