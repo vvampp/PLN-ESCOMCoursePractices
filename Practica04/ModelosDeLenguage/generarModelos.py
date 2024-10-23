@@ -6,10 +6,8 @@ from collections import Counter
 import os.path
 
 nlp = spacy.load('es_core_news_sm')
-#nltk.download('punkt')
 
-def readChat():
-    txt_file = 'rawCorpusAdair.txt'
+def readChat(txt_file):
     txt_folder = os.path.join(os.getcwd(), 'RawCorporea')
     txt_filepath = os.path.join(txt_folder,txt_file) 
 
@@ -23,9 +21,7 @@ def readChat():
         return
     
 
-def extractMessages(raw_corpus):
-    # pattern = r'\[\d{2}/\d{2}/\d{2}, \d{2}:\d{2}:\d{2}\] bambino: (.+)'
-    pattern = r'[\d\d?/\d\d?/\d\d, \d\d?:\d\d( PM| AM)] - AdairG: (.+)'
+def extractMessages(raw_corpus, pattern):
     messages = re.findall(pattern, raw_corpus)
     filtered_messages = [mesage for mesage in messages
                          if not re.search(r'\u200E',mesage)
@@ -34,13 +30,10 @@ def extractMessages(raw_corpus):
                          and not re.search(r'You deleted this message', mesage)
                          and not re.search(r'null', mesage)
                          and not re.search(r'file://(.+)', mesage)
-
                          ]
     return filtered_messages
 
-
-def sentencize(messages):
-    destiny_tsv_file = 'tokenized_corpus_Adair.tsv'
+def sentencize(messages, destiny_tsv_file):
     tsv_folder = os.path.join(os.getcwd(),'TokenizedCorporea')
     tsv_filepah = os.path.join(tsv_folder,destiny_tsv_file)
 
@@ -61,7 +54,7 @@ def sentencize(messages):
     df.to_csv(tsv_filepah, sep='\t', index=False)
     return df
 
-def calculateFrequency(sentencized_corpus):
+def calculateFrequency(sentencized_corpus, bigram_destiny_tsv_file, trigram_destiny_tsv_file):
     language_model_folder = os.path.join(os.getcwd(),'LanguageModels')
 
     unigram_freq = Counter()
@@ -79,12 +72,12 @@ def calculateFrequency(sentencized_corpus):
         bigram_freq.update(bigrams)
         trigram_freq.update(trigrams)
 
-    calculateBigram(bigram_freq,unigram_freq,language_model_folder)
-    calculateTrigram(trigram_freq,bigram_freq,language_model_folder)
+    calculateBigram(bigram_freq,unigram_freq,language_model_folder, bigram_destiny_tsv_file)
+    calculateTrigram(trigram_freq,bigram_freq,language_model_folder, trigram_destiny_tsv_file)
     
 
-def calculateBigram(bigram_freq,unigram_freq,language_model_folder):
-    destiny_tsv_file = 'bigram_language_model_adair.tsv'
+def calculateBigram(bigram_freq,unigram_freq,language_model_folder, destiny_tsv_file):
+    # destiny_tsv_file = 'bigram_language_model_adair.tsv'
     rows = []
     bigram_probabilities = {}
     for bigram in bigram_freq:
@@ -101,11 +94,9 @@ def calculateBigram(bigram_freq,unigram_freq,language_model_folder):
     bigram_tsv = pd.DataFrame(sorted_rows)
     language_model_filepath = os.path.join(language_model_folder,destiny_tsv_file)
     bigram_tsv.to_csv(language_model_filepath,sep='\t',index=False)
-        
 
-
-def calculateTrigram(trigram_freq,bigram_freq,language_model_folder):
-    destiny_tsv_file = 'trigram_language_model_adair.tsv'
+def calculateTrigram(trigram_freq,bigram_freq,language_model_folder, destiny_tsv_file):
+    # destiny_tsv_file = 'trigram_language_model_adair.tsv'
     rows = []
     trigram_probabilities = {}
     for trigram in trigram_freq:
@@ -123,13 +114,40 @@ def calculateTrigram(trigram_freq,bigram_freq,language_model_folder):
     trigram_tsv = pd.DataFrame(sorted_rows)
     language_model_filepath = os.path.join(language_model_folder,destiny_tsv_file)
     trigram_tsv.to_csv(language_model_filepath,sep='\t',index=False)
-  
+
+def generar_modelo(file_txt):
+    raw_corpus = readChat(file_txt)
+
+    # El patron dependera del formato
+    pattern = ""
+    messages = extractMessages(raw_corpus, pattern)
+
+    #El nombre del archivo se genera a partir del nombre del txt
+    actor = obtener_nombre_actor(file_txt)
+    destiny_tsv_file = f"tokenized_corpus_{actor}.tsv"
+    sentencized_corpus = sentencize(messages, destiny_tsv_file)
+
+    bigram_destiny_tsv_file = f"bigram_language_model_{actor}.tsv"
+    trigram_destiny_tsv_file = f"trigram_language_model_{actor}.tsv"
+    calculateFrequency(sentencized_corpus, bigram_destiny_tsv_file, trigram_destiny_tsv_file)
+
+def obtener_nombre_actor(file_txt):
+    nombre = file_txt.removeprefix("rawCorpus")
+    nombre = nombre.removesuffix(".txt")
+    return nombre
 
 def main():
-    raw_corpus = readChat()
-    messages = extractMessages(raw_corpus)
-    sentencized_corpus = sentencize(messages)
-    calculateFrequency(sentencized_corpus)
+    raw_corpus = readChat("rawCorpusAdair.txt")
+
+    # EL pattern depende del formato del archivo
+    # pattern = r'\[\d{2}/\d{2}/\d{2}, \d{2}:\d{2}:\d{2}\] bambino: (.+)'
+    pattern = r'[\d\d?/\d\d?/\d\d, \d\d?:\d\d( PM| AM)] - AdairG: (.+)'
+
+    messages = extractMessages(raw_corpus, pattern)
+
+    destiny_tsv_file = 'tokenized_corpus_Adair.tsv'
+    sentencized_corpus = sentencize(messages, destiny_tsv_file)
+    calculateFrequency(sentencized_corpus, 'bigram_language_model_adair.tsv', 'trigram_language_model_adair.tsv')
 
 
 if __name__ == "__main__":

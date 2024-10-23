@@ -2,7 +2,10 @@ import pandas as pd
 import os.path
 
 def loadModel(model_filename):
-    diretory = os.path.join(os.path.dirname(os.getcwd()),'ModelosDeLenguage\\LanguageModels')
+    # diretory = os.path.join(os.path.dirname(os.getcwd()),'ModelosDeLenguage\\LanguageModels')
+
+    # Para ejecutar en el pycharm alv
+    diretory = os.path.join(os.path.dirname(os.getcwd()),'ModelosDeLenguage/LanguageModels')
     try:   
         filepah = os.path.join(diretory,model_filename)
         model = pd.read_csv(filepah,sep='\t')
@@ -44,6 +47,7 @@ def bigramPrediction(model,ngramStart):
 
 def trigramPrediction(model,ngramStart):
     predictedText = ngramStart
+    print (ngramStart)
     while ngramStart.split()[1] != '.':
         indexes,nextT1 = searchTrigram(model,ngramStart)
         nextWord = []
@@ -61,21 +65,18 @@ def trigramPrediction(model,ngramStart):
 
 def main ():
     # Recibido desde front end 
-    feature = 'bi'               # bi / tri
-    model_filename = 'bigram_language_model_adair.tsv'          
-    ngramStart = 'No'
+    feature = 'tri'               # bi / tri
+    model_filename = 'trigram_language_model_adair.tsv'
+    ngramStart = 'material del'
 
     model = loadModel(model_filename)
 
     if(feature == 'bi'):
         predictedText = bigramPrediction(model,ngramStart)
-
     else:
         predictedText = trigramPrediction(model,ngramStart)
 
     print(predictedText)
-    
-
 
 if __name__ == "__main__":
     main()
