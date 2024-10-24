@@ -11,15 +11,91 @@
         <div class="title-bar">Create Language Models</div>
         <div class="content">
             <button class="btn-highlight">Load corpus</button>
-            <div class="input-group">
-                <input type="text" placeholder="Search">
-                <button>Browse</button>
+            <div class="file-group">
+                <span class="file-name">Search</span>
+                <label for="file-input" class="file-label">Browse</label>
+                <input type="file" id="file-input" class="file-input">
             </div>
             <div class="actions">
-                <button>Generate bigrams</button>
-                <button>Generate trigrams</button>
+                <button id="bigram-button">Generate bigrams</button>
+                <button id="trigram-button">Generate trigrams</button>
             </div>
         </div>
     </div>
+    <div id="error-modal" class="modal hidden">
+        <div class="modal-content">
+            <span id="close-modal" class="close-button">&times;</span>
+            <h2 id="modal-title">Error</h2>
+            <p id="modal-message"></p>
+        </div>
+    </div>
+
+    <div id="success-modal" class="modal hidden">
+        <div class="modal-content">
+            <span id="close-modal2" class="close-button">&times;</span>
+            <h2 id="modal-title2">¡Éxito!</h2>
+            <p id="modal-message2"></p>
+        </div>
+    </div>
 </body>
+<script>
+    const fileInput = document.getElementById('file-input');
+    const fileNameDisplay = document.querySelector('.file-name');
+    const bigramButton = document.getElementById('bigram-button')
+    const trigramButton = document.getElementById('trigram-button')
+    const errorModal = document.getElementById('error-modal');
+    const successModal = document.getElementById('success-modal');
+    const modalMessage = document.getElementById('modal-message');
+    const modalMessage2 = document.getElementById('modal-message2');
+    const closeModalButton = document.getElementById('close-modal');
+    const closeModalButton2 = document.getElementById('close-modal2');
+
+    fileInput.addEventListener('change', (event) => {
+        const file = event.target.files[0];
+        fileNameDisplay.textContent = file ? file.name : 'Search';
+    });
+
+    function showModal(message) {
+        modalMessage.textContent = message;
+        errorModal.classList.add('show');
+        errorModal.classList.remove('hidden');
+    }
+    function showModalSuccess(message) {
+        modalMessage2.textContent = message;
+        successModal.classList.add('show');
+        successModal.classList.remove('hidden');
+    }
+
+    
+    closeModalButton.addEventListener('click', () => {
+        errorModal.classList.add('hidden');
+        errorModal.classList.remove('show');
+    });
+
+    closeModalButton2.addEventListener('click', () => {
+        successModal.classList.add('hidden');
+        successModal.classList.remove('show');
+    });
+
+    bigramButton.addEventListener('click', () => {
+        const fileLoaded = fileInput.files.length > 0;
+
+        if (!fileLoaded) {
+            showModal('Por favor, carga un archivo en "Load corpus".');
+        }else {
+            showModalSuccess('¡Validación exitosa! Generando bigramas...');
+        }
+    });
+
+    trigramButton.addEventListener('click', () => {
+        const fileLoaded = fileInput.files.length > 0;
+
+        if (!fileLoaded) {
+            showModal('Por favor, carga un archivo en "Load corpus".');
+        } else {
+            showModalSuccess('¡Validación exitosa! Generando trigramas...');
+        }
+    });
+</script>
+
 </html>
