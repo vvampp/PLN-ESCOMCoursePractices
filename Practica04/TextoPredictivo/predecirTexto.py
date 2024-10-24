@@ -62,6 +62,37 @@ def trigramPrediction(model,ngramStart):
     return predictedText
 
 
+def most_probable_words_bigram(model, ngramStart):
+    while ngramStart != '.':
+        indexes = searchBigram(model, ngramStart)
+        nextWord = []
+        for index in indexes:
+            if (model['Term 2'].iloc[index] != '#'):
+                nextWord.append(model['Term 2'].iloc[index])
+        nextWord.append(".")
+        # Enviar a front end
+        return nextWord
+
+
+def most_probable_words_trigram(model, ngramStart):
+    print(ngramStart)
+    while ngramStart.split()[1] != '.':
+        indexes, nextT1 = searchTrigram(model, ngramStart)
+        nextWord = []
+        for index in indexes:
+            if (model['Term 3'].iloc[index] != '#'):
+                nextWord.append(model['Term 3'].iloc[index])
+        nextWord.append(".")
+        return nextWord
+
+def get_palabras_probables(model_filename, feature, ngramStart):
+    model = loadModel(model_filename)
+    if(feature == 'bi'):
+        most_probable_words = most_probable_words_bigram(model,ngramStart)
+    else:
+        most_probable_words = most_probable_words_trigram(model,ngramStart)
+    return most_probable_words
+
 
 def main ():
     # Recibido desde front end 

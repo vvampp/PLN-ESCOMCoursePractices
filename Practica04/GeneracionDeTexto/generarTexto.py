@@ -91,6 +91,14 @@ def trigramTextGeneration(model,trirgamStart):
     return generatedText
 
 
+def generar_texto(model_filename, feature, ngramStart):
+    model = loadModel(model_filename)
+    if(feature == 'bi'):
+        generatedText = bigramTextGeneration(model,ngramStart)
+    else:
+        generatedText = trigramTextGeneration(model,ngramStart)
+    return generatedText
+
 
 def main():
     feature = 'tri'

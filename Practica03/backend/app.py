@@ -1,7 +1,6 @@
 from flask import Flask, request, render_template, redirect, url_for, flash
 import os
 import pandas as pd
-from jinja2.ext import do
 
 # from backend.analyzer import vectorizeTest, cosine_similarity
 from corpusVectorization import vectorizeAll
