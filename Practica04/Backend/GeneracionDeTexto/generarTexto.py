@@ -90,6 +90,32 @@ def trigramTextGeneration(model,trirgamStart):
         generatedText += " " + model['Term 3'].iloc[selected_index]
     return generatedText
 
+def getNext(model,start):
+    probabilities = []
+    
+    indexes = searchBigram(model,start)
+
+    probabilities= [model['Conditional Probability of Trigram'].iloc[index] for index in indexes]
+
+    total_prob = sum(probabilities)
+    normalized_probs = [prob / total_prob for prob in probabilities]
+    acc_probs = []
+    acc_sum = 0
+
+    for prob in normalized_probs:
+        acc_sum += prob
+        acc_probs.append(acc_sum)
+
+    rand_val = random.random()
+    selected_index = None
+
+    for i, accProb in enumerate(acc_probs):
+        if rand_val <= accProb:
+            selected_index = indexes[i]
+            break
+
+    next = model['Term 2'].iloc[selected_index]
+    return next
 
 def generar_texto(model_filename, feature, ngramStart):
     model = loadModel(model_filename)
@@ -102,14 +128,15 @@ def generar_texto(model_filename, feature, ngramStart):
 
 def main():
     feature = 'tri'
-    model_filename = 'trigram_language_model_adair.tsv'
-    ngramStart = 'creo que'
+    model_filename = 'trigram_language_model_Rojo.tsv'
+    ngramStart = '$'
 
     model = loadModel(model_filename)
 
     if(feature == 'bi'):
-         generatedText = bigramTextGeneration(model,ngramStart)
+        generatedText = bigramTextGeneration(model,ngramStart)
     else:
+        ngramStart = ngramStart + " " + getNext(model,ngramStart)
         generatedText = trigramTextGeneration(model,ngramStart)
 
     print(generatedText)

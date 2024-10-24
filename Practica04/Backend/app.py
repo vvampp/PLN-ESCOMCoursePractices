@@ -1,9 +1,9 @@
 from flask import Flask, request, render_template, redirect, url_for, flash
 
 # Importar funciones
-from Practica04.ModelosDeLenguage.generarModelos import generar_modelo
-from Practica04.TextoPredictivo.predecirTexto import get_palabras_probables
-from Practica04.GeneracionDeTexto.generarTexto import generar_texto
+from Practica04.Backend.ModelosDeLenguage.generarModelos import generar_modelo
+from Practica04.Backend.TextoPredictivo.predecirTexto import get_palabras_probables
+from Practica04.Backend.GeneracionDeTexto.generarTexto import generar_texto
 
 app = Flask(__name__, template_folder='../templates')
 
