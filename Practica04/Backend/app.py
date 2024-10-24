@@ -37,7 +37,17 @@ def prediccion_texto():
             return redirect(url_for('predictive_text'))
 
         file = request.files['file-input-corpus']
-        if file and file.filename.endswith('.tsv'):
+        # Si envian archivo y palabras, pero no la palabra probable a  agregar, significa que es la primera iteracion
+        # el proceso es de prediccion es
+        # 1 . Se recibe archivo tsv
+        # 2. Se recibe palabras para iniciar prediccion
+        # 3. Se determina si es bigrama o trigrama con base a la cantidad de palabras
+        # 4. Se obtienen las palabras probables
+        # 5. La pagina se refresca cuando se le da al boton de 'Next Word', esta pagina refrescada imprime
+        # 5.1. En texto generado imprime las palabras que estaban ingresadas,
+        # 5.2. En palabras probables se imprimen las palabras recuperadas
+        # 6. El usuario escoge la nueva palabra y presiona el boton addWord y pasamos al segundo if
+        if file and file.filename.endswith('.tsv') and request.form.get('id-words') and not request.form.get('form-probable-words'):
             # Parametros para la prediccion
             tsv_file = file.filename
             words = request.form.get('id-words')
@@ -45,8 +55,8 @@ def prediccion_texto():
             feature = "bi" if len(words.split()) == 1 else "tri"
 
             probable_words = get_palabras_probables(tsv_file, feature, words)
-            # enviar a frontend
 
+            # enviar a frontend
             return redirect(url_for('predictive_text', probable_word1 = probable_words[0],
                                     probable_word2 = probable_words[1],
                                     probable_word3 = probable_words[2],
@@ -54,10 +64,11 @@ def prediccion_texto():
                                     predicted_text= words,
                                     tsv_file = tsv_file
                                     ))
+
+
         if request.form.get('form-probable-words'):
             new_word = request.form.get('form-probable-words')
             predicted_text = request.form.get('predicted-text')
-
 
             predicted_text = predicted_text + " " + new_word
 
