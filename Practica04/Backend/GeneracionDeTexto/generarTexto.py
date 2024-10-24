@@ -117,6 +117,14 @@ def getNext(model,start):
     next = model['Term 2'].iloc[selected_index]
     return next
 
+def generar_texto(model_filename, feature, ngramStart):
+    model = loadModel(model_filename)
+    if(feature == 'bi'):
+        generatedText = bigramTextGeneration(model,ngramStart)
+    else:
+        generatedText = trigramTextGeneration(model,ngramStart)
+    return generatedText
+
 
 def main():
     feature = 'tri'
