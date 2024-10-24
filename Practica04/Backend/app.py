@@ -5,7 +5,7 @@ from Practica04.Backend.ModelosDeLenguage.generarModelos import generar_modelo
 from Practica04.Backend.TextoPredictivo.predecirTexto import get_palabras_probables
 from Practica04.Backend.GeneracionDeTexto.generarTexto import generar_texto
 
-app = Flask(__name__, template_folder='../templates')
+app = Flask(__name__, template_folder='../Frontend/templates')
 
 app.secret_key = 'your_secret_key'
 UPLOAD_FOLDER = 'uploads'
