@@ -34,13 +34,12 @@ def getBigramProbabilities(w1,w2,models):
             bigram_row = context_rows[context_rows['Term 2'] == w2]
             if not bigram_row.empty:
                 bigram_frequency = bigram_row['Frequency of Bigram'].iloc[0]
-                bigramProbability.append((bigram_frequency+1)/(context_freq + vocabulary_size))
+                bigramProbability.append((bigram_frequency+1)/(context_freq + 1))
             else:
-                bigramProbability.append(1 / (context_freq + vocabulary_size))
+                bigramProbability.append(1 / (context_freq + 1))
         
         else:
             bigramProbability.append(1/vocabulary_size)
-        print(f"Vocabulary Size: {vocabulary_size}, W1: {w1}, W2: {w2}, Bigram Frequency: {bigram_frequency}, Context Frequency: {context_freq}, Probability: {bigramProbability[-1]}")
     return bigramProbability
 
 
@@ -57,10 +56,10 @@ def getTrigramProbabilities(w1,w2,w3,models):
             trigram_row = context_rows_2[context_rows_2['Term 3'] == w3]
             if not trigram_row.empty:
                 trigram_freq = trigram_row['Frequency of Trigram'].iloc[0]
-                trigramProbability.append((trigram_freq+1)/(context_freq_2+bigram_count))
+                trigramProbability.append((trigram_freq+1)/(context_freq_2+1))
             
             else:
-                trigramProbability.append(1/(context_freq_2+bigram_count))
+                trigramProbability.append(1/(context_freq_2+1))
         else:
             trigramProbability.append(1/bigram_count)
     print(trigramProbability)
@@ -71,7 +70,7 @@ def main():
     feature = 'bi'
     models,model_filenames = loadModels(feature)
 
-    test_sentence = 'hola hola'
+    test_sentence = 'soñé contigo'
     test_sentence =  "$ " + test_sentence + " #"
     words = test_sentence.split()
 
