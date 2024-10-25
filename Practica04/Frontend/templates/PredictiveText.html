@@ -4,16 +4,16 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Predictive Text</title>
-    <link rel="stylesheet" href="../css/styles.css">
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/styles.css') }}">
 </head>
 <body>
     <div class="content-body">
         <nav class="navbar">
             <ul class="navbar-list">
-                <li><a href="LanguageModels.html">Language Models</a></li>
-                <li><a href="ConditionalProbability.html">Conditional Probability</a></li>
-                <li><a href="PredictiveText.html"  class="active-link">Predictive Text</a></li>
-                <li><a href="TextGeneration.html">Text Generation</a></li>
+                <li><a href="{{ url_for('home') }}">Language Models</a></li>
+                <li><a href="{{ url_for('conditionalProb') }}">Conditional Probability</a></li>
+                <li><a href="{{ url_for('predictiveText') }}"  class="active-link">Predictive Text</a></li>
+                <li><a href="{{ url_for('textGeneration') }}">Text Generation</a></li>
             </ul>
         </nav>
         <div class="window">

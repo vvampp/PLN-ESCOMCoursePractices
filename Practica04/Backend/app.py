@@ -1,11 +1,12 @@
 from flask import Flask, request, render_template, redirect, url_for, flash
 
 # Importar funciones
-from Practica04.Backend.ModelosDeLenguage.generarModelos import generar_modelo
-from Practica04.Backend.TextoPredictivo.predecirTexto import get_palabras_probables
-from Practica04.Backend.GeneracionDeTexto.generarTexto import generar_texto
+from ModelosDeLenguage.generarModelos import generar_modelo
+from TextoPredictivo.predecirTexto import get_palabras_probables
+from GeneracionDeTexto.generarTexto import generar_texto
 
-app = Flask(__name__, template_folder='../Frontend/templates')
+app = Flask(__name__, template_folder='../Frontend/templates', static_folder='../Frontend/static', static_url_path='/static')
+
 
 app.secret_key = 'your_secret_key'
 UPLOAD_FOLDER = 'uploads'
@@ -115,6 +116,22 @@ def generate_text(generated_text):
     return render_template('TextGeneration.html',
                            generated_text = generated_text
                            )
+
+@app.route('/')
+def home():
+    return render_template('LanguageModels.html')
+
+@app.route('/conditionalProb')
+def conditionalProb():
+    return render_template('ConditionalProbability.html')
+
+@app.route('/predictiveText')
+def predictiveText():
+    return render_template('PredictiveText.html')
+
+@app.route('/textGeneration')
+def textGeneration():
+    return render_template('TextGeneration.html')
 
 if __name__ == '__main__':
     app.run(debug=True)
