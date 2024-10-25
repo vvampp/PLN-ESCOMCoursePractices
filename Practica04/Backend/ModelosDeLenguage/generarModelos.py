@@ -7,61 +7,26 @@ import os.path
 
 nlp = spacy.load('es_core_news_sm')
 
-def readChat(txt_file):
-    txt_folder = os.path.join(os.getcwd(), 'RawCorporea')
-    txt_filepath = os.path.join(txt_folder,txt_file) 
+def readTokenizedCorpus(tsv_file):
+    tsv_folder = os.path.join(os.getcwd(), 'ModelosDeLenguage', 'TokenizedCorporea')
+    tsv_filepath = os.path.join(tsv_folder, tsv_file)
 
     try:
-        with open (txt_filepath, 'r', encoding='utf-8') as file:
-            raw_corpus = '\n'.join([line.rstrip() for line in file])
-            return raw_corpus
-
+        df = pd.read_csv(tsv_filepath, sep='\t', encoding='utf-8')
+        return df['Documents'].tolist() 
     except Exception as e:
         print(f"An exception occurred: {e}")
         return
-    
 
-def extractMessages(raw_corpus, pattern):
-    messages = re.findall(pattern, raw_corpus)
-    filtered_messages = [mesage for mesage in messages
-                         if not re.search(r'\u200E',mesage)
-                         and not re.search( r'https?://[A-Za-z0-9-]+\.+[A-Za-z]{2,}(?::\d{1,5})?(?:(?:/[\w\-\.~%]+)*)?(?:\?(?:[\w\-\.~%]+=[\w\-\.~%]*(?:&[\w\-\.~%]+=[\w\-.~%]*)*)?)?(?:#[\w\-.~%\/\+!\@\(\)\[\]\{\}]+)??', mesage)
-                        and not re.search(r'<Media omitted>', mesage)
-                         and not re.search(r'You deleted this message', mesage)
-                         and not re.search(r'null', mesage)
-                         and not re.search(r'file://(.+)', mesage)
-                         ]
-    return filtered_messages
+def calculateFrequency(sentencized_corpus, bigram_destiny_tsv_file=None, trigram_destiny_tsv_file=None, ngram_type=None):
 
-def sentencize(messages, destiny_tsv_file):
-    tsv_folder = os.path.join(os.getcwd(),'TokenizedCorporea')
-    tsv_filepah = os.path.join(tsv_folder,destiny_tsv_file)
-
-    df = pd.DataFrame()
-    sentences = []
-
-    if "sentencizer" not in nlp.pipe_names:
-        nlp.add_pipe("sentencizer")
-
-    docs = list(nlp.pipe(messages,batch_size=50))
-
-    for doc in docs:
-        for sent in doc.sents:
-            sentence = sent.text
-            sentences.append("$ "+sentence+" #")
-
-    df = pd.DataFrame(sentences, columns=["Documents"])
-    df.to_csv(tsv_filepah, sep='\t', index=False)
-    return df
-
-def calculateFrequency(sentencized_corpus, bigram_destiny_tsv_file, trigram_destiny_tsv_file):
-    language_model_folder = os.path.join(os.getcwd(),'LanguageModels')
+    language_model_folder = os.path.join(os.getcwd(), 'ModelosDeLenguage', 'LanguageModels')
 
     unigram_freq = Counter()
     bigram_freq = Counter()
     trigram_freq = Counter()
 
-    docs = list(nlp.pipe(sentencized_corpus['Documents'],batch_size=50))
+    docs = list(nlp.pipe(sentencized_corpus, batch_size=50))
 
     for doc in docs:
         tokens = [token.text for token in doc]
@@ -72,9 +37,10 @@ def calculateFrequency(sentencized_corpus, bigram_destiny_tsv_file, trigram_dest
         bigram_freq.update(bigrams)
         trigram_freq.update(trigrams)
 
-    calculateBigram(bigram_freq,unigram_freq,language_model_folder, bigram_destiny_tsv_file)
-    calculateTrigram(trigram_freq,bigram_freq,language_model_folder, trigram_destiny_tsv_file)
-    
+    if ngram_type == 'bigram':
+        calculateBigram(bigram_freq, unigram_freq, language_model_folder, bigram_destiny_tsv_file)
+    elif ngram_type == 'trigram':
+        calculateTrigram(trigram_freq, bigram_freq, language_model_folder, trigram_destiny_tsv_file)
 
 def calculateBigram(bigram_freq,unigram_freq,language_model_folder, destiny_tsv_file):
     # destiny_tsv_file = 'bigram_language_model_adair.tsv'
@@ -115,40 +81,12 @@ def calculateTrigram(trigram_freq,bigram_freq,language_model_folder, destiny_tsv
     language_model_filepath = os.path.join(language_model_folder,destiny_tsv_file)
     trigram_tsv.to_csv(language_model_filepath,sep='\t',index=False)
 
-def generar_modelo(file_txt):
-    raw_corpus = readChat(file_txt)
+def generar_modelo(tsv_file, ngram_type):
+    sentencized_corpus = readTokenizedCorpus(tsv_file)
 
-    # El patron dependera del formato
-    pattern = ""
-    messages = extractMessages(raw_corpus, pattern)
-
-    #El nombre del archivo se genera a partir del nombre del txt
-    actor = obtener_nombre_actor(file_txt)
-    destiny_tsv_file = f"tokenized_corpus_{actor}.tsv"
-    sentencized_corpus = sentencize(messages, destiny_tsv_file)
-
-    bigram_destiny_tsv_file = f"bigram_language_model_{actor}.tsv"
-    trigram_destiny_tsv_file = f"trigram_language_model_{actor}.tsv"
-    calculateFrequency(sentencized_corpus, bigram_destiny_tsv_file, trigram_destiny_tsv_file)
-
-def obtener_nombre_actor(file_txt):
-    nombre = file_txt.removeprefix("rawCorpus")
-    nombre = nombre.removesuffix(".txt")
-    return nombre
-
-def main():
-    raw_corpus = readChat("rawCorpusAdair.txt")
-
-    # EL pattern depende del formato del archivo
-    # pattern = r'\[\d{2}/\d{2}/\d{2}, \d{2}:\d{2}:\d{2}\] bambino: (.+)'
-    pattern = r'[\d\d?/\d\d?/\d\d, \d\d?:\d\d( PM| AM)] - AdairG: (.+)'
-
-    messages = extractMessages(raw_corpus, pattern)
-
-    destiny_tsv_file = 'tokenized_corpus_Adair.tsv'
-    sentencized_corpus = sentencize(messages, destiny_tsv_file)
-    calculateFrequency(sentencized_corpus, 'bigram_language_model_adair.tsv', 'trigram_language_model_adair.tsv')
-
-
-if __name__ == "__main__":
-    main()
+    if ngram_type == 'bigram':
+        bigram_destiny_tsv_file = f"bigram_language_model_{tsv_file.split('.')[0]}.tsv"
+        calculateFrequency(sentencized_corpus, bigram_destiny_tsv_file=bigram_destiny_tsv_file, ngram_type='bigram')
+    elif ngram_type == 'trigram':
+        trigram_destiny_tsv_file = f"trigram_language_model_{tsv_file.split('.')[0]}.tsv"
+        calculateFrequency(sentencized_corpus, trigram_destiny_tsv_file=trigram_destiny_tsv_file, ngram_type='trigram')

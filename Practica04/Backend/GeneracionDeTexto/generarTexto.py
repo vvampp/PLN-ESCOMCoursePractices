@@ -3,14 +3,18 @@ import os.path
 import random
 
 def loadModel(model_filename):
-    diretory = os.path.join(os.path.dirname(os.getcwd()),'ModelosDeLenguage\\LanguageModels')
-    try:   
-        filepah = os.path.join(diretory,model_filename)
-        model = pd.read_csv(filepah,sep='\t')
+    directory = os.path.join(os.path.dirname(os.getcwd()),'Backend', 'ModelosDeLenguage', 'LanguageModels')
+    file_path = os.path.join(directory, model_filename)
+    
+    try:
+        model = pd.read_csv(file_path, sep='\t')
         return model
+    except FileNotFoundError:
+        print(f'El archivo no fue encontrado: {file_path}')
+        return None 
     except Exception as e:
-        print(f'An exception occurred: {e}')
-        return e
+        print(f'Ocurrió un error: {e}')
+        return None 
     
 def searchBigram(model,bigramStart):
     w = bigramStart.split()
@@ -119,28 +123,14 @@ def getNext(model,start):
 
 def generar_texto(model_filename, feature, ngramStart):
     model = loadModel(model_filename)
-    if(feature == 'bi'):
-        generatedText = bigramTextGeneration(model,ngramStart)
+    
+    if model is None:
+        raise Exception(f"No se pudo cargar el modelo desde {model_filename}. Verifica la ruta y el formato del archivo.")
+    
+    if feature == 'bi':
+        generatedText = bigramTextGeneration(model, ngramStart)
     else:
-        generatedText = trigramTextGeneration(model,ngramStart)
+        ngramStart = ngramStart + " " + getNext(model, ngramStart)
+        generatedText = trigramTextGeneration(model, ngramStart)
+
     return generatedText
-
-
-def main():
-    feature = 'tri'
-    model_filename = 'trigram_language_model_Rojo.tsv'
-    ngramStart = '$'
-
-    model = loadModel(model_filename)
-
-    if(feature == 'bi'):
-        generatedText = bigramTextGeneration(model,ngramStart)
-    else:
-        ngramStart = ngramStart + " " + getNext(model,ngramStart)
-        generatedText = trigramTextGeneration(model,ngramStart)
-
-    print(generatedText)
-   
-
-if __name__ == "__main__":
-    main()

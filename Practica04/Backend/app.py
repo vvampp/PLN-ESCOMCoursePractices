@@ -1,11 +1,12 @@
 from flask import Flask, request, render_template, redirect, url_for, flash
 
 # Importar funciones
-from Practica04.Backend.ModelosDeLenguage.generarModelos import generar_modelo
-from Practica04.Backend.TextoPredictivo.predecirTexto import get_palabras_probables
-from Practica04.Backend.GeneracionDeTexto.generarTexto import generar_texto
+from ModelosDeLenguage.generarModelos import generar_modelo
+from TextoPredictivo.predecirTexto import get_palabras_probables
+from GeneracionDeTexto.generarTexto import generar_texto
 
-app = Flask(__name__, template_folder='../Frontend/templates')
+app = Flask(__name__, template_folder='../Frontend/templates', static_folder='../Frontend/static', static_url_path='/static')
+
 
 app.secret_key = 'your_secret_key'
 UPLOAD_FOLDER = 'uploads'
@@ -20,13 +21,22 @@ def modelos_lenguaje():
             return redirect(url_for('language_models'))
 
         file = request.files['file-input-corpus']
-        if file and file.filename.endswith('.txt'):
-            txt_file = file.filename
-            generar_modelo(txt_file)
-            flash('Modelado de lenguaje completado!.')
-            return redirect(url_for('language_models'))
+        ngram_type = request.form.get('n-gram-type')
 
-    return redirect(url_for('language_models'))
+        if file and file.filename.endswith('.tsv'):
+            print(f"File received: {file.filename}")
+            tsv_file = file.filename
+            
+            if ngram_type == 'bigram':
+                generar_modelo(tsv_file, 'bigram')
+                flash('Modelado de bigramas completado!')
+            elif ngram_type == 'trigram':
+                generar_modelo(tsv_file, 'trigram')
+                flash('Modelado de trigramas completado!')
+
+            return redirect(url_for('home'))
+
+    return redirect(url_for('home'))
 
 
 @app.route('/prediccion_texto', methods=['POST'])
@@ -81,21 +91,22 @@ def generacion_texto():
     if request.method == 'POST':
         if 'file-input-corpus' not in request.files:
             flash("No se seleccionó ningún archivo", "error")
-            return redirect(url_for('generate_text'))
+            return redirect(url_for('home'))
 
         file = request.files['file-input-corpus']
         if file and file.filename.endswith('.tsv'):
-            # Parametros para la generacion
             tsv_file = file.filename
-            words = request.form.get('id-words')
-            # Feature se determinar segun el numero de palabras en la cadena words
-            feature = "bi" if len(words.split()) == 1 else "tri"
+
+            feature = "bi" if "bigram" in tsv_file.split('_')[0] else "tri"
+            words = '$'
 
             generated_text = generar_texto(tsv_file, feature, words)
+            print(generated_text)
+            generated_text = generated_text[1:-1] if len(generated_text) > 2 else ""
 
-            return redirect(url_for('generate_text', generated_text = generated_text))
+            return render_template('TextGeneration.html', generated_text=generated_text)
 
-    return redirect(url_for('generate_text'))
+    return redirect(url_for('textGeneration'))
 
 @app.route('/probabilidad_condicional', methods=['POST'])
 def probabilidad_condicional():
@@ -126,6 +137,22 @@ def generate_text(generated_text):
     return render_template('TextGeneration.html',
                            generated_text = generated_text
                            )
+
+@app.route('/')
+def home():
+    return render_template('LanguageModels.html')
+
+@app.route('/conditionalProb')
+def conditionalProb():
+    return render_template('ConditionalProbability.html')
+
+@app.route('/predictiveText')
+def predictiveText():
+    return render_template('PredictiveText.html')
+
+@app.route('/textGeneration')
+def textGeneration():
+    return render_template('TextGeneration.html')
 
 if __name__ == '__main__':
     app.run(debug=True)
