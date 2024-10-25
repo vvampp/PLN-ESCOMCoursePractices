@@ -7,64 +7,154 @@
     <link rel="stylesheet" href="../css/styles.css">
 </head>
 <body>
-    <div class="window">
-        <div class="title-bar">Conditional Probability</div>
-        <div class="content">
-            <button class="btn-highlight">Load language model</button>
-            <div class="input-group">
-                <input type="text" placeholder="Search">
-                <button>Browse</button>
-            </div>
-            <div class="model-list">
-                <table>
+    <div class="content-body">
+        <nav class="navbar">
+            <ul class="navbar-list">
+                <li><a href="LanguageModels.html">Language Models</a></li>
+                <li><a href="ConditionalProbability.html" class="active-link">Conditional Probability</a></li>
+                <li><a href="PredictiveText.html">Predictive Text</a></li>
+                <li><a href="TextGeneration.html">Text Generation</a></li>
+            </ul>
+        </nav>
+        <div class="window">
+            <div class="title-bar">Conditional Probability</div>
+            <div class="content">
+                <button class="btn-highlight">Load language model</button>
+                <div class="file-group">
+                    <span class="file-name">Search</span>
+                    <label for="file-input" class="file-label">Browse</label>
+                    <input type="file" id="file-input" class="file-input">
+                </div>
+                
+                <div class="model-list">
+                    <!-- <table>
+                        <thead>
+                            <tr>
+                                <th>
+                                    Model
+                                </th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>Model 1</td>
+                            </tr>
+                            <tr>
+                                <td>Model 2</td>
+                            </tr>
+                            <tr>
+                                <td>Model n</td>
+                            </tr>
+                        </tbody>
+                    </table> -->
+                </div>
+                    <button class="btn-highlight">Test sentence</button>
+                    <div class="input-group">
+                        <input type="text" id="test-sentence" placeholder="Test sentence">
+                        <button id="determine-probability">Determine joint probability</button>
+                    </div>
+                <!-- <table>
                     <thead>
                         <tr>
-                            <th>
-                                Model
-                            </th>
+                            <th>Language model</th>
+                            <th>Joint probability</th>
                         </tr>
                     </thead>
                     <tbody>
                         <tr>
                             <td>Model 1</td>
+                            <td>0.05</td>
                         </tr>
                         <tr>
                             <td>Model 2</td>
+                            <td>0.04</td>
                         </tr>
                         <tr>
                             <td>Model n</td>
+                            <td>0.0001</td>
                         </tr>
                     </tbody>
-                </table>
+                </table> -->
             </div>
-                <button class="btn-highlight">Test sentence</button>
-                <div class="input-group">
-                    <input type="text" placeholder="Test sentence">
-                    <button>Determine joint probability</button>
-                </div>
-            <table>
-                <thead>
-                    <tr>
-                        <th>Language model</th>
-                        <th>Joint probability</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <tr>
-                        <td>Model 1</td>
-                        <td>0.05</td>
-                    </tr>
-                    <tr>
-                        <td>Model 2</td>
-                        <td>0.04</td>
-                    </tr>
-                    <tr>
-                        <td>Model n</td>
-                        <td>0.0001</td>
-                    </tr>
-                </tbody>
-            </table>
+        </div>
+    </div>
+
+
+
+    <div id="error-modal" class="modal hidden">
+        <div class="modal-content">
+            <span id="close-modal" class="close-button">&times;</span>
+            <h2 id="modal-title">Error</h2>
+            <p id="modal-message"></p>
+        </div>
+    </div>
+
+    <div id="success-modal" class="modal hidden">
+        <div class="modal-content">
+            <span id="close-modal2" class="close-button">&times;</span>
+            <h2 id="modal-title2">¡Éxito!</h2>
+            <p id="modal-message2"></p>
         </div>
     </div>
 </body>
+
+<script>
+    const fileInput = document.getElementById('file-input');
+    const fileNameDisplay = document.querySelector('.file-name');
+    const determineButton = document.getElementById('determine-probability');
+    const testSentenceInput = document.getElementById('test-sentence');
+    const errorModal = document.getElementById('error-modal');
+    const successModal = document.getElementById('success-modal');
+    const modalMessage = document.getElementById('modal-message');
+    const modalMessage2 = document.getElementById('modal-message2');
+    const closeModalButton = document.getElementById('close-modal');
+    const closeModalButton2 = document.getElementById('close-modal2');
+
+    
+    fileInput.addEventListener('change', (event) => {
+        const file = event.target.files[0];
+        fileNameDisplay.textContent = file ? file.name : 'Search';
+    });
+
+    
+    function showModal(message) {
+        modalMessage.textContent = message;
+        errorModal.classList.add('show');
+        errorModal.classList.remove('hidden');
+    }
+    function showModalSuccess(message) {
+        modalMessage2.textContent = message;
+        successModal.classList.add('show');
+        successModal.classList.remove('hidden');
+    }
+
+    
+    closeModalButton.addEventListener('click', () => {
+        errorModal.classList.add('hidden');
+        errorModal.classList.remove('show');
+    });
+
+    closeModalButton2.addEventListener('click', () => {
+        successModal.classList.add('hidden');
+        successModal.classList.remove('show');
+    });
+
+    determineButton.addEventListener('click', () => {
+        const fileLoaded = fileInput.files.length > 0;
+        const testSentence = testSentenceInput.value.trim();
+
+        if (!fileLoaded && !testSentence) {
+            showModal('Por favor, carga un archivo y escribe una oración.');
+        } else if (!fileLoaded) {
+            showModal('Por favor, carga un archivo en "Load language model".');
+        } else if (!testSentence) {
+            showModal('Por favor, escribe una oración en "Test sentence".');
+        } else {
+            showModalSuccess('¡Validación exitosa! Calculando la probabilidad conjunta...');
+        }
+    });
+</script>
+
+
+
 </html>
