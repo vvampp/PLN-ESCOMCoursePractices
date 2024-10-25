@@ -7,29 +7,40 @@
     <link rel="stylesheet" href="../css/styles.css">
 </head>
 <body>
-    <div class="window">
-        <div class="title-bar">Predictive Text</div>
-        <div class="content">
-            <button class="btn-highlight">Load language model</button>
-            <div class="file-group">
-                <span class="file-name">Search</span>
-                <label for="file-input" class="file-label">Browse</label>
-                <input type="file" id="file-input" class="file-input">
+    <div class="content-body">
+        <nav class="navbar">
+            <ul class="navbar-list">
+                <li><a href="LanguageModels.html">Language Models</a></li>
+                <li><a href="ConditionalProbability.html">Conditional Probability</a></li>
+                <li><a href="PredictiveText.html"  class="active-link">Predictive Text</a></li>
+                <li><a href="TextGeneration.html">Text Generation</a></li>
+            </ul>
+        </nav>
+        <div class="window">
+            <div class="title-bar">Predictive Text</div>
+            <div class="content">
+                <button class="btn-highlight">Load language model</button>
+                <div class="file-group">
+                    <span class="file-name">Search</span>
+                    <label for="file-input" class="file-label">Browse</label>
+                    <input type="file" id="file-input" class="file-input">
+                </div>
+                <button class="btn-highlight">Write a word or two words</button>
+                <div class="input-group">
+                    <input type="text" placeholder="Word" id="words">
+                    <button id="next-word">Next word</button>
+                    <select>
+                        <option>3 most probable words</option>
+                    </select>
+                </div>
+                <div class="add">
+                    <button>Add word</button>
+                </div>
+                <textarea placeholder="Generated text"></textarea>
             </div>
-            <button class="btn-highlight">Write a word or two words</button>
-            <div class="input-group">
-                <input type="text" placeholder="Word" id="words">
-                <button id="next-word">Next word</button>
-                <select>
-                    <option>3 most probable words</option>
-                </select>
-            </div>
-            <div class="add">
-                <button>Add word</button>
-            </div>
-            <textarea placeholder="Generated text"></textarea>
         </div>
     </div>
+
     <div id="error-modal" class="modal hidden">
         <div class="modal-content">
             <span id="close-modal" class="close-button">&times;</span>
