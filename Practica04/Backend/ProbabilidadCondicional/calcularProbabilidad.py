@@ -1,27 +1,20 @@
-import os.path
+import os
 import pandas as pd
 
-
-def loadModels(feature):
-    diretory = os.path.join(os.path.dirname(os.getcwd()),'ModelosDeLenguage\\LanguageModels')
+def loadModels(model_filenames):
+    directory = os.path.join(os.path.dirname(os.getcwd()),'Backend', 'ModelosDeLenguage', 'LanguageModels')
     models = []
-    if(feature=='bi'):
-        model_filenames = ['bigram_language_model_adair.tsv','bigram_language_model_bambino.tsv','bigram_language_model_Rojo.tsv']
-    else:
-        model_filenames = ['trigram_language_model_adair.tsv','trigram_language_model_bambino.tsv','trigram_language_model_Rojo.tsv'] 
 
     for filename in model_filenames:
-            try:   
-                filepah = os.path.join(diretory,filename)
-                models.append(pd.read_csv(filepah,sep='\t'))
-            except Exception as e:
-                print(f'An exception occurred: {e}')
-    return models, model_filenames
-            
+        try:
+            filepath = os.path.join(directory, filename)
+            models.append(pd.read_csv(filepath, sep='\t'))
+        except Exception as e:
+            print(f'An exception occurred: {e}')
+    return models
 
-def getBigramProbabilities(w1,w2,models):
+def getBigramProbabilities(w1, w2, models):
     bigramProbability = []
-
     for model in models:
         context_freq = 0
         bigram_frequency = 0
@@ -34,20 +27,17 @@ def getBigramProbabilities(w1,w2,models):
             bigram_row = context_rows[context_rows['Term 2'] == w2]
             if not bigram_row.empty:
                 bigram_frequency = bigram_row['Frequency of Bigram'].iloc[0]
-                bigramProbability.append((bigram_frequency+1)/(context_freq + 1))
+                bigramProbability.append((bigram_frequency + 1) / (context_freq + 1))
             else:
                 bigramProbability.append(1 / (context_freq + 1))
-        
         else:
-            bigramProbability.append(1/vocabulary_size)
+            bigramProbability.append(1 / vocabulary_size)
     return bigramProbability
 
-
-def getTrigramProbabilities(w1,w2,w3,models):
+def getTrigramProbabilities(w1, w2, w3, models):
     trigramProbability = []
-
     for model in models:
-        bigram_count = model[['Term 1','Term 2']].drop_duplicates().shape[0]
+        bigram_count = model[['Term 1', 'Term 2']].drop_duplicates().shape[0]
 
         context_rows_2 = model[(model['Term 1'] == w1) & (model['Term 2'] == w2)]
         if not context_rows_2.empty:
@@ -56,43 +46,42 @@ def getTrigramProbabilities(w1,w2,w3,models):
             trigram_row = context_rows_2[context_rows_2['Term 3'] == w3]
             if not trigram_row.empty:
                 trigram_freq = trigram_row['Frequency of Trigram'].iloc[0]
-                trigramProbability.append((trigram_freq+1)/(context_freq_2+1))
-            
+                trigramProbability.append((trigram_freq + 1) / (context_freq_2 + 1))
             else:
-                trigramProbability.append(1/(context_freq_2+1))
+                trigramProbability.append(1 / (context_freq_2 + 1))
         else:
-            trigramProbability.append(1/bigram_count)
-    print(trigramProbability)
+            trigramProbability.append(1 / bigram_count)
     return trigramProbability
 
+def calculateProbabilities(model_filenames_str, test_sentence):
+    model_filenames = [name.strip() for name in model_filenames_str.split(',')]
+    models = loadModels(model_filenames)
 
-def main():
-    feature = 'bi'
-    models,model_filenames = loadModels(feature)
+    print(models)
 
-    test_sentence = 'soñé contigo'
-    test_sentence =  "$ " + test_sentence + " #"
+    test_sentence = "$ " + test_sentence + " #"
+    print(test_sentence)
     words = test_sentence.split()
 
-    sentenceProbability = [1,1,1]
+    sentenceProbability = [1] * len(models)
 
-    if(feature == 'bi'):
-        for i in range(len(words)-1):
-            probabilities = getBigramProbabilities(words[i],words[i+1],models)
-            sentenceProbability = [x * y for x, y in zip(sentenceProbability, probabilities)]
-            print('\n')
-    else:
-        for i in range(len(words)-2):
-            probabilities = getTrigramProbabilities(words[i],words[i+1],words[i+2],models)
-            sentenceProbability = [x * y for x, y in zip(sentenceProbability, probabilities)]
-            print('\n')
+    for i, filename in enumerate(model_filenames):
+        model_type = filename.split('_')[0].lower()
+        print(model_type)
 
-    formatedProbabilities = [(model_filenames[i],probability) for i,probability in enumerate(sentenceProbability)]
-    sortedProbabilities = sorted(formatedProbabilities, key=lambda x:x[1],reverse=True)
+        if model_type == 'bigram':
+            for j in range(len(words) - 1):
+                probabilities = getBigramProbabilities(words[j], words[j + 1], [models[i]])
+                sentenceProbability[i] *= probabilities[0]
+        elif model_type == 'trigram':
+            for j in range(len(words) - 2):
+                probabilities = getTrigramProbabilities(words[j], words[j + 1], words[j + 2], [models[i]])
+                sentenceProbability[i] *= probabilities[0]
+        else:
+            print(f"El archivo '{filename}' no es un modelo válido (bigram/trigram).")
 
-    print(sortedProbabilities)
+    formattedProbabilities = [(model_filenames[i], prob) for i, prob in enumerate(sentenceProbability)]
+    sortedProbabilities = sorted(formattedProbabilities, key=lambda x: x[1], reverse=True)
 
-    
+    return sortedProbabilities
 
-if __name__ == "__main__":
-    main()

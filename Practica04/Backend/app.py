@@ -1,15 +1,18 @@
-from flask import Flask, request, render_template, redirect, url_for, flash
+from flask import Flask, request, render_template, redirect, url_for, flash, jsonify
+import os
 
 # Importar funciones
 from ModelosDeLenguage.generarModelos import generar_modelo
 from TextoPredictivo.predecirTexto import get_palabras_probables
 from GeneracionDeTexto.generarTexto import generar_texto
+from ProbabilidadCondicional.calcularProbabilidad import calculateProbabilities
 
 app = Flask(__name__, template_folder='../Frontend/templates', static_folder='../Frontend/static', static_url_path='/static')
 
 
 app.secret_key = 'your_secret_key'
-UPLOAD_FOLDER = 'uploads'
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+UPLOAD_FOLDER = os.path.join(BASE_DIR, 'ModelosDeLenguage', 'TokenizedCorporea')
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 
 
@@ -24,7 +27,8 @@ def modelos_lenguaje():
         ngram_type = request.form.get('n-gram-type')
 
         if file and file.filename.endswith('.tsv'):
-            print(f"File received: {file.filename}")
+            file_path = os.path.join(UPLOAD_FOLDER, file.filename)
+            file.save(file_path)
             tsv_file = file.filename
             
             if ngram_type == 'bigram':
@@ -97,14 +101,20 @@ def generacion_texto():
 
     return redirect(url_for('textGeneration'))
 
-@app.route('/probabilidad_condicional', methods=['POST'])
-def probabilidad_condicional():
+@app.route('/probabilidad', methods=['POST'])
+def probabilidad():
+    model_names = request.form.get('model_names', '') 
+    test_sentence = request.form.get('test_sentence', '')
+    
+    print('Oracion: ' + test_sentence)
 
-    return redirect(url_for('home'))
+    probabilities = calculateProbabilities(model_names, test_sentence)
 
-@app.route('/language_models')
-def language_models():
-    return render_template('LanguageModels.html')
+    print(f"Probabilidades calculadas: {probabilities}")
+
+    probabilities_dict = [{"model": name, "probability": prob} for name, prob in probabilities]
+
+    return jsonify(probabilities_dict)
 
 @app.route('/predictive_text')
 def predictive_text(
@@ -121,11 +131,6 @@ def predictive_text(
                            tsv_file=tsv_file
                            )
 
-@app.route('/generate_text')
-def generate_text(generated_text):
-    return render_template('TextGeneration.html',
-                           generated_text = generated_text
-                           )
 
 @app.route('/')
 def home():
