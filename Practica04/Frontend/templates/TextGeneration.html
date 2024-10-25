@@ -21,15 +21,17 @@
             <div class="title-bar">Text Generation</div>
             <div class="content">
                 <button class="btn-highlight">Load corpus</button>
-                <div class="file-group">
-                    <span class="file-name">Search</span>
-                    <label for="file-input" class="file-label">Browse</label>
-                    <input type="file" id="file-input" class="file-input">
-                </div>
-                <div class="generate">
-                    <button id="generate-button">Generate sentence</button>
-                </div>
-                <textarea placeholder="Generated text"></textarea>
+                <form id="generate-text-form" method="POST" action="{{ url_for('generacion_texto') }}" enctype="multipart/form-data">
+                    <div class="file-group">
+                        <span class="file-name">Search</span>
+                        <label for="file-input" class="file-label">Browse</label>
+                        <input type="file" id="file-input"  name="file-input-corpus" class="file-input" accept=".tsv">
+                    </div>
+                    <div class="generate">
+                        <button type="submit" id="generate-button">Generate sentence</button>
+                    </div>
+                </form>
+                <textarea placeholder="Generated text" readonly>{{ generated_text }}</textarea>
             </div>
         </div>
         
@@ -55,6 +57,7 @@
     const fileNameDisplay = document.querySelector('.file-name');
     const generateButton = document.getElementById('generate-button')
     const errorModal = document.getElementById('error-modal');
+    var form = document.getElementById('generate-text-form'); 
     const successModal = document.getElementById('success-modal');
     const modalMessage = document.getElementById('modal-message');
     const modalMessage2 = document.getElementById('modal-message2');
@@ -89,12 +92,14 @@
     });
 
     generateButton.addEventListener('click', () => {
+        event.preventDefault(); 
         const fileLoaded = fileInput.files.length > 0;
 
         if (!fileLoaded) {
             showModal('Por favor, carga un archivo en "Load corpus".');
         }else {
-            showModalSuccess('¡Validación exitosa! Generando oraciones...');
+            // showModalSuccess('¡Validación exitosa! Generando oraciones...');
+            form.submit();
         }
     });
 

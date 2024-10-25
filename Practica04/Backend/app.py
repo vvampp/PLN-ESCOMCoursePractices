@@ -80,21 +80,22 @@ def generacion_texto():
     if request.method == 'POST':
         if 'file-input-corpus' not in request.files:
             flash("No se seleccionó ningún archivo", "error")
-            return redirect(url_for('generate_text'))
+            return redirect(url_for('home'))
 
         file = request.files['file-input-corpus']
         if file and file.filename.endswith('.tsv'):
-            # Parametros para la generacion
             tsv_file = file.filename
-            words = request.form.get('id-words')
-            # Feature se determinar segun el numero de palabras en la cadena words
-            feature = "bi" if len(words.split()) == 1 else "tri"
+
+            feature = "bi" if "bigram" in tsv_file.split('_')[0] else "tri"
+            words = '$'
 
             generated_text = generar_texto(tsv_file, feature, words)
+            print(generated_text)
+            generated_text = generated_text[1:-1] if len(generated_text) > 2 else ""
 
-            return redirect(url_for('generate_text', generated_text = generated_text))
+            return render_template('TextGeneration.html', generated_text=generated_text)
 
-    return redirect(url_for('generate_text'))
+    return redirect(url_for('textGeneration'))
 
 @app.route('/probabilidad_condicional', methods=['POST'])
 def probabilidad_condicional():
