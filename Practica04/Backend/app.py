@@ -21,13 +21,22 @@ def modelos_lenguaje():
             return redirect(url_for('language_models'))
 
         file = request.files['file-input-corpus']
-        if file and file.filename.endswith('.txt'):
-            txt_file = file.filename
-            generar_modelo(txt_file)
-            flash('Modelado de lenguaje completado!.')
-            return redirect(url_for('language_models'))
+        ngram_type = request.form.get('n-gram-type')
 
-    return redirect(url_for('language_models'))
+        if file and file.filename.endswith('.tsv'):
+            print(f"File received: {file.filename}")
+            tsv_file = file.filename
+            
+            if ngram_type == 'bigram':
+                generar_modelo(tsv_file, 'bigram')
+                flash('Modelado de bigramas completado!')
+            elif ngram_type == 'trigram':
+                generar_modelo(tsv_file, 'trigram')
+                flash('Modelado de trigramas completado!')
+
+            return redirect(url_for('home'))
+
+    return redirect(url_for('home'))
 
 
 @app.route('/prediccion_texto', methods=['POST'])

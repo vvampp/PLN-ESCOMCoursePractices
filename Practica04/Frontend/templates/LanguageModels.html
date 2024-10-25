@@ -21,16 +21,19 @@
         <div class="window">
             <div class="title-bar">Create Language Models</div>
             <div class="content">
-                <button class="btn-highlight">Load corpus</button>
-                <div class="file-group">
-                    <span class="file-name">Search</span>
-                    <label for="file-input" class="file-label">Browse</label>
-                    <input type="file" id="file-input" class="file-input">
-                </div>
-                <div class="actions">
-                    <button id="bigram-button">Generate bigrams</button>
-                    <button id="trigram-button">Generate trigrams</button>
-                </div>
+                <form id="generate-model-form" method="POST" action="{{ url_for('modelos_lenguaje') }}" enctype="multipart/form-data">
+                    <button class="btn-highlight">Load corpus</button>
+                    <div class="file-group">
+                        <span class="file-name">Search</span>
+                        <label for="file-input" class="file-label">Browse</label>
+                        <input type="file" id="file-input" class="file-input" name="file-input-corpus" accept=".tsv">
+                    </div>
+                    <div class="actions">
+                        <input type="hidden" id="n-gram-type" name="n-gram-type">
+                        <button id="bigram-button" type="button">Generate bigrams</button>
+                        <button id="trigram-button" type="button">Generate trigrams</button>
+                    </div>
+                </form>
             </div>
         </div>
     </div>
@@ -56,6 +59,8 @@
     const fileNameDisplay = document.querySelector('.file-name');
     const bigramButton = document.getElementById('bigram-button')
     const trigramButton = document.getElementById('trigram-button')
+    const nGramTypeInput = document.getElementById('n-gram-type');
+    var form = document.getElementById('generate-model-form'); 
     const errorModal = document.getElementById('error-modal');
     const successModal = document.getElementById('success-modal');
     const modalMessage = document.getElementById('modal-message');
@@ -96,7 +101,9 @@
         if (!fileLoaded) {
             showModal('Por favor, carga un archivo en "Load corpus".');
         }else {
-            showModalSuccess('¡Validación exitosa! Generando bigramas...');
+            // showModalSuccess('¡Validación exitosa! Bigramas generados...');
+            nGramTypeInput.value = 'bigram';
+            form.submit();
         }
     });
 
@@ -106,7 +113,9 @@
         if (!fileLoaded) {
             showModal('Por favor, carga un archivo en "Load corpus".');
         } else {
-            showModalSuccess('¡Validación exitosa! Generando trigramas...');
+            // showModalSuccess('¡Validación exitosa! Trigramas generados...');
+            nGramTypeInput.value = 'trigram';
+            form.submit();
         }
     });
 </script>
