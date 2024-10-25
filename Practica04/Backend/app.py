@@ -4,14 +4,11 @@ from flask import Flask, request, render_template, redirect, url_for, flash
 from ModelosDeLenguage.generarModelos import generar_modelo
 from TextoPredictivo.predecirTexto import get_palabras_probables
 from GeneracionDeTexto.generarTexto import generar_texto
-
 app = Flask(__name__, template_folder='../Frontend/templates', static_folder='../Frontend/static', static_url_path='/static')
-
 
 app.secret_key = 'your_secret_key'
 UPLOAD_FOLDER = 'uploads'
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
-
 
 @app.route('/modelos_lenguaje', methods=['POST'])
 def modelos_lenguaje():
@@ -49,7 +46,7 @@ def prediccion_texto():
         file = request.files['file-input-corpus']
         # Si envian archivo y palabras, pero no la palabra probable a  agregar, significa que es la primera iteracion
         # el proceso es de prediccion es
-        # 1 . Se recibe archivo tsv
+        # 1. Se recibe archivo tsv
         # 2. Se recibe palabras para iniciar prediccion
         # 3. Se determina si es bigrama o trigrama con base a la cantidad de palabras
         # 4. Se obtienen las palabras probables
@@ -67,22 +64,45 @@ def prediccion_texto():
             probable_words = get_palabras_probables(tsv_file, feature, words)
 
             # enviar a frontend
+            # los datos enviados al front son:
+            # 1. Las palabras probables
+            # 2. El texto generado hasta el momento
+            # 3. El archivo tsv (solo el nombre)
+            #
             return redirect(url_for('predictive_text', probable_word1 = probable_words[0],
                                     probable_word2 = probable_words[1],
                                     probable_word3 = probable_words[2],
                                     probable_word4 = probable_words[3],
                                     predicted_text= words,
-                                    tsv_file = tsv_file
+                                    tsv_file = tsv_file,
+                                    feature = feature
                                     ))
 
-
+        # Si se envia la palabra probable, significa que es la segunda o la n-esima iteracion
+        # El proceso es el siguiente
+        # 1. Se recibe la palabra probable
+        # 2. Se recibe el texto generado hasta el momento (predicted_text)
+        # 3. Se concatena la palabra probable al texto generado
+        # 4. Se obtienen las nuevas palabras probables
         if request.form.get('form-probable-words'):
+            tsv_file = request.form.get('tsv-file')
             new_word = request.form.get('form-probable-words')
             predicted_text = request.form.get('predicted-text')
+            feature = request.form.get('feature')
 
             predicted_text = predicted_text + " " + new_word
 
+            probable_words = get_palabras_probables(tsv_file, feature, predicted_text)
 
+            # enviar a frontend y el mismo proceso se repite
+            return redirect(url_for('predictive_text', probable_word1 = probable_words[0],
+                                    probable_word2 = probable_words[1],
+                                    probable_word3 = probable_words[2],
+                                    probable_word4 = probable_words[3],
+                                    predicted_text= predicted_text,
+                                    tsv_file = tsv_file,
+                                    feature = feature
+                                    ))
 
     return redirect(url_for('predictive_text'))
 
@@ -104,14 +124,29 @@ def generacion_texto():
             print(generated_text)
             generated_text = generated_text[1:-1] if len(generated_text) > 2 else ""
 
-            return render_template('TextGeneration.html', generated_text=generated_text)
+            return render_template('TextGeneration.html',
+                                   generated_text=generated_text)
 
     return redirect(url_for('textGeneration'))
 
 @app.route('/probabilidad_condicional', methods=['POST'])
 def probabilidad_condicional():
+    if request.method == 'POST':
+        # if 'file-input-corpus' not in request.files:
+        #     flash("No se seleccionó ningún archivo", "error")
+        #     return redirect(url_for('ConditionalProbability.html'))
+        #
+        # file = request.files['file-input-corpus']
+        # if file and file.filename.endswith('.tsv'):
+        #     tsv_file = file.filename
+        #
+        #     return redirect(url_for('conditional_probability',
+        #                             tsv_file=tsv_file)
+        #                     )
+        print("TODO")
 
-    return redirect(url_for('home'))
+
+    return redirect(url_for('ConditionalProbability.html'))
 
 @app.route('/language_models')
 def language_models():
@@ -119,17 +154,22 @@ def language_models():
 
 @app.route('/predictive_text')
 def predictive_text(
-        probable_words,
+        probable_word1,
+        probable_word2,
+        probable_word3,
+        probable_word4,
         words,
-        tsv_file
+        tsv_file,
+        feature
 ):
     return render_template('PredictiveText.html',
-                           probable_word1=probable_words[0],
-                           probable_word2=probable_words[1],
-                           probable_word3=probable_words[2],
-                           probable_word4=probable_words[3],
+                           probable_word1=probable_word1,
+                           probable_word2=probable_word2,
+                           probable_word3=probable_word3,
+                           probable_word4=probable_word4,
                            predicted_text=words,
-                           tsv_file=tsv_file
+                           tsv_file=tsv_file,
+                           feature=feature
                            )
 
 @app.route('/generate_text')
@@ -137,6 +177,11 @@ def generate_text(generated_text):
     return render_template('TextGeneration.html',
                            generated_text = generated_text
                            )
+
+@app.route('/conditional_probability')
+def conditional_probability(tsv_file):
+    return render_template('ConditionalProbability.html',
+                           tsv_file=tsv_file)
 
 @app.route('/')
 def home():

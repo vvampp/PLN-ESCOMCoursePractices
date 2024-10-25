@@ -1,9 +1,9 @@
-import pandas as pd
-import re
-import spacy
-import nltk
-from collections import Counter
 import os.path
+from collections import Counter
+
+import nltk
+import pandas as pd
+import spacy
 
 nlp = spacy.load('es_core_news_sm')
 
