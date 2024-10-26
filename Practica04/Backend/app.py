@@ -1,4 +1,4 @@
-from flask import Flask, request, render_template, redirect, url_for, flash, jsonify
+from flask import Flask, request, render_template, redirect, url_for, flash, jsonify, session
 import os
 
 # Importar funciones
@@ -113,6 +113,9 @@ def prediccion_texto():
 @app.route('/generacion_texto', methods=['POST'])
 def generacion_texto():
     if request.method == 'POST':
+        # Obtener archivo tsv del value que hay en session
+        tsv_file = session['tsv_file']
+
         if 'file-input-corpus' not in request.files:
             flash("No se seleccionó ningún archivo", "error")
             return redirect(url_for('home'))
@@ -121,16 +124,37 @@ def generacion_texto():
         if file and file.filename.endswith('.tsv'):
             tsv_file = file.filename
 
+            # Como el archivo ya esta guardado en el servidor, solo tenemos que recuperar el archivo
+            # para el posterior renderizado
+            session['tsv_file'] = tsv_file
+            file_path = os.path.join(app.config['UPLOAD_FOLDER'], session['tsv_file'])
+
+
             feature = "bi" if "bigram" in tsv_file.split('_')[0] else "tri"
             words = '$'
 
-            generated_text = generar_texto(tsv_file, feature, words)
+            generated_text = generar_texto(session['tsv_file'], feature, words)
             print(generated_text)
             generated_text = generated_text[1:-1] if len(generated_text) > 2 else ""
 
             return render_template('TextGeneration.html',
-                                   generated_text=generated_text)
+                                   generated_text=generated_text,
+                                   tsv_file=session['tsv_file']
+                                   )
+        elif tsv_file:
+            feature = "bi" if "bigram" in tsv_file.split('_')[0] else "tri"
+            words = '$'
 
+            generated_text = generar_texto(session['tsv_file'], feature, words)
+            print(generated_text)
+            generated_text = generated_text[1:-1] if len(generated_text) > 2 else ""
+
+            return render_template('TextGeneration.html',
+                                   generated_text=generated_text,
+                                   tsv_file=session['tsv_file']
+                                   )
+
+    print("kakakak")
     return redirect(url_for('textGeneration'))
 
 @app.route('/probabilidad', methods=['POST'])
