@@ -5,7 +5,8 @@ def loadModel(model_filename):
     # diretory = os.path.join(os.path.dirname(os.getcwd()),'ModelosDeLenguage\\LanguageModels')
 
     # Para ejecutar en el pycharm alv
-    diretory = os.path.join(os.path.dirname(os.getcwd()),'ModelosDeLenguage/LanguageModels')
+    print(os.getcwd())
+    diretory = os.path.join(os.path.dirname(os.getcwd()),'Backend/ModelosDeLenguage/LanguageModels')
     try:   
         filepah = os.path.join(diretory,model_filename)
         model = pd.read_csv(filepah,sep='\t')

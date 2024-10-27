@@ -45,7 +45,7 @@ def prediccion_texto():
     if request.method == 'POST':
         if 'file-input-corpus' not in request.files:
             flash("No se seleccionó ningún archivo", "error")
-            return redirect(url_for('predictive_text'))
+            return redirect(url_for('predictiveText'))
 
         file = request.files['file-input-corpus']
         # Si envian archivo y palabras, pero no la palabra probable a  agregar, significa que es la primera iteracion
@@ -58,29 +58,54 @@ def prediccion_texto():
         # 5.1. En texto generado imprime las palabras que estaban ingresadas,
         # 5.2. En palabras probables se imprimen las palabras recuperadas
         # 6. El usuario escoge la nueva palabra y presiona el boton addWord y pasamos al segundo if
-        if file and file.filename.endswith('.tsv') and request.form.get('id-words') and not request.form.get('form-probable-words'):
+        print(f'filename: {file.filename}, words: {request.form.get("words")}, probable-words: {request.form.get("probable-words")}')
+        if file and file.filename.endswith('.tsv') and request.form.get('words') and not request.form.get('probable-words'):
+            print('entro a primera iteracion')
             # Parametros para la prediccion
             tsv_file = file.filename
-            words = request.form.get('id-words')
+            # Para el posterior renderizado
+            session['tsv_file'] = tsv_file
+            words = request.form.get('words')
             # Feature se determinar segun el numero de palabras en la cadena words
             feature = "bi" if len(words.split()) == 1 else "tri"
 
+            print(f'Archivo: {tsv_file}, Palabras: {words}, Feature: {feature}')
             probable_words = get_palabras_probables(tsv_file, feature, words)
+            print(probable_words)
+
+            # probable_words es una lista que no es seguro que tenga las 4 palabras, por lo que se debe
+            # hacer un chequeo para saber si se tienen las 4 palabras
+            print(f'Cantidad de palabras: {len(probable_words)}')
+            if len(probable_words) < 4:
+                # Si no tiene las 4 palabras, se debe llenar con espacios
+                for i in range(4 - len(probable_words)):
+                    probable_words.append("")
+
+            print(probable_words)
+            print(f'Datos enviados a frontend: probable_word1: {probable_words[0]}, '
+                  f'probable_word2: {probable_words[1]}, '
+                  f'probable_word3: {probable_words[2]}, '
+                  f'probable_word4: {probable_words[3]}, '
+                  f'predicted_text: {words}, tsv_file: {tsv_file}, '
+                  f'feature: {feature}')
+
+            # Antes de enviar a frontend, se debe guardar en session la variable predicted_text
+            session['predicted_text'] = words
+            session['feature'] = feature
 
             # enviar a frontend
             # los datos enviados al front son:
             # 1. Las palabras probables
             # 2. El texto generado hasta el momento
             # 3. El archivo tsv (solo el nombre)
-            #
-            return redirect(url_for('predictive_text', probable_word1 = probable_words[0],
+            return render_template('PredictiveText.html', probable_word1 = probable_words[0],
                                     probable_word2 = probable_words[1],
                                     probable_word3 = probable_words[2],
                                     probable_word4 = probable_words[3],
                                     predicted_text= words,
-                                    tsv_file = tsv_file,
+                                    tsv_file = session['tsv_file'],
                                     feature = feature
-                                    ))
+                                    )
 
         # Si se envia la palabra probable, significa que es la segunda o la n-esima iteracion
         # El proceso es el siguiente
@@ -88,27 +113,60 @@ def prediccion_texto():
         # 2. Se recibe el texto generado hasta el momento (predicted_text)
         # 3. Se concatena la palabra probable al texto generado
         # 4. Se obtienen las nuevas palabras probables
-        if request.form.get('form-probable-words'):
-            tsv_file = request.form.get('tsv-file')
-            new_word = request.form.get('form-probable-words')
-            predicted_text = request.form.get('predicted-text')
-            feature = request.form.get('feature')
+        if request.form.get('probable-words'):
+            print('entro a segunda o n iteracion')
 
+            tsv_file = session['tsv_file']
+            new_word = request.form.get('probable-words')
+            # Primero se recupera el texto generado hasta el momento si es que hay
+            # de la variable session
+            predicted_text = session['predicted_text']
+            feature = session['feature']
             predicted_text = predicted_text + " " + new_word
 
-            probable_words = get_palabras_probables(tsv_file, feature, predicted_text)
+            print(f'Archivo: {tsv_file}, Palabras: {predicted_text}, Feature: {feature}')
+
+            # Dependiendo si es bigrama o trigrama, se obtienen las palabras probables
+            if feature == "bi":
+                latest_word = predicted_text.split()[-1]
+                probable_words = get_palabras_probables(tsv_file, feature, latest_word)
+            else:
+                latest_words = " ".join(predicted_text.split()[-2:])
+                probable_words = get_palabras_probables(tsv_file, feature, latest_words)
+
+            # probable_words es una lista que no es seguro que tenga las 4 palabras, por lo que se debe
+            # hacer un chequeo para saber si se tienen las 4 palabras
+            # primero revisemos que probable_words sea diferentes del tipo NoneType
+            if not probable_words:
+                return render_template('PredictiveText.html', probable_word1 = "",
+                                    probable_word2 = "",
+                                    probable_word3 = "",
+                                    probable_word4 = "",
+                                    predicted_text= predicted_text,
+                                    tsv_file = session['tsv_file'],
+                                    feature = feature
+                                    )
+            print(f'Cantidad de palabras: {len(probable_words)}')
+            if len(probable_words) < 4:
+                # Si no tiene las 4 palabras, se debe llenar con espacios
+                for i in range(4 - len(probable_words)):
+                    probable_words.append("")
+
+            # antes de enviar a front, actualiza la variable de session
+            session['predicted_text'] = predicted_text
 
             # enviar a frontend y el mismo proceso se repite
-            return redirect(url_for('predictive_text', probable_word1 = probable_words[0],
+            return render_template('PredictiveText.html', probable_word1 = probable_words[0],
                                     probable_word2 = probable_words[1],
                                     probable_word3 = probable_words[2],
                                     probable_word4 = probable_words[3],
                                     predicted_text= predicted_text,
-                                    tsv_file = tsv_file,
+                                    tsv_file = session['tsv_file'],
                                     feature = feature
-                                    ))
+                                    )
 
-    return redirect(url_for('predictive_text'))
+    print('entro a nada xd')
+    return redirect(url_for('predictiveText'))
 
 @app.route('/generacion_texto', methods=['POST'])
 def generacion_texto():
@@ -127,8 +185,6 @@ def generacion_texto():
             # Como el archivo ya esta guardado en el servidor, solo tenemos que recuperar el archivo
             # para el posterior renderizado
             session['tsv_file'] = tsv_file
-            file_path = os.path.join(app.config['UPLOAD_FOLDER'], session['tsv_file'])
-
 
             feature = "bi" if "bigram" in tsv_file.split('_')[0] else "tri"
             words = '$'
@@ -154,7 +210,6 @@ def generacion_texto():
                                    tsv_file=session['tsv_file']
                                    )
 
-    print("kakakak")
     return redirect(url_for('textGeneration'))
 
 @app.route('/probabilidad', methods=['POST'])

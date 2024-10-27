@@ -19,24 +19,36 @@
         <div class="window">
             <div class="title-bar">Predictive Text</div>
             <div class="content">
-                <button class="btn-highlight">Load language model</button>
-                <div class="file-group">
-                    <span class="file-name">Search</span>
-                    <label for="file-input" class="file-label">Browse</label>
-                    <input type="file" id="file-input" class="file-input">
-                </div>
-                <button class="btn-highlight">Write a word or two words</button>
-                <div class="input-group">
-                    <input type="text" placeholder="Word" id="words">
-                    <button id="next-word">Next word</button>
-                    <select>
-                        <option>3 most probable words</option>
-                    </select>
-                </div>
-                <div class="add">
-                    <button>Add word</button>
-                </div>
-                <textarea placeholder="Generated text"></textarea>
+                <form id="predictive-text-form" method="POST" action="{{ url_for('prediccion_texto') }}" enctype="multipart/form-data">
+                    <button class="btn-highlight">Load language model</button>
+                    <div class="file-group">
+                        <span class="file-name">{{ tsv_file if tsv_file else "Search" }}</span>
+                        <label for="file-input" class="file-label">Browse</label>
+                        <input type="file" id="file-input" class="file-input" name="file-input-corpus" accept=".tsv" value={{ tsv_file if tsv_file }}>
+                    </div>
+                    <button class="btn-highlight">Write a word or two words</button>
+                    <div class="input-group">
+                        <label for="words">
+                            <input type="text" placeholder="Word" id="words" name="words">
+                        </label>
+                        <button type="submit" id="next-word">Next word</button>
+                        <label>
+                            <select id="probable-words" name="probable-words">
+                                <option value="{{ probable_word1 }}">{{ probable_word1 }}</option>
+                                <option value="{{ probable_word2 }}">{{ probable_word2 }}</option>
+                                <option value="{{ probable_word3 }}">{{ probable_word3 }}</option>
+                                <option value="{{ probable_word4 }}">{{ probable_word4 }}</option>
+                            </select>
+                        </label>
+                    </div>
+                    <div class="add">
+                        <button type="submit" id="add-word">Add word</button>
+                    </div>
+                </form>
+
+                <label>
+                    <textarea placeholder="Generated text" readonly>{{ predicted_text }}</textarea>
+                </label>
             </div>
         </div>
     </div>
@@ -99,7 +111,7 @@
     nextButton.addEventListener('click', () => {
         const fileLoaded = fileInput.files.length > 0;
         const testSentence = testSentenceInput.value.trim()
-
+/*
         if (!fileLoaded && !testSentence) {
             showModal('Por favor, carga un archivo y escribe una oración.');
         } else if (!fileLoaded) {
@@ -108,6 +120,17 @@
             showModal('Por favor, escribe una oración en "Test sentence".');
         } else {
             showModalSuccess('¡Validación exitosa! Generando texto...');
+        }*/
+        showModalSuccess('¡Validación exitosa! Generando texto...');
+    });
+
+    document.addEventListener('DOMContentLoaded', function() {
+        const fileNameDisplay = document.querySelector('.tsv_file');
+        const fileInput = document.getElementById('file-input');
+        const fileName = "{{ tsv_file }}";
+        if (fileName) {
+            fileNameDisplay.textContent = fileName;
+            fileInput.disabled = true;
         }
     });
 
