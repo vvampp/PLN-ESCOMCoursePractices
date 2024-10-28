@@ -171,9 +171,6 @@ def prediccion_texto():
 @app.route('/generacion_texto', methods=['POST'])
 def generacion_texto():
     if request.method == 'POST':
-        # Obtener archivo tsv del value que hay en session
-        tsv_file = session['tsv_file']
-
         if 'file-input-corpus' not in request.files:
             flash("No se seleccionó ningún archivo", "error")
             return redirect(url_for('home'))
@@ -197,7 +194,11 @@ def generacion_texto():
                                    generated_text=generated_text,
                                    tsv_file=session['tsv_file']
                                    )
-        elif tsv_file:
+
+
+        elif session['tsv_file']:
+            # Obtener archivo tsv del value que hay en session
+            tsv_file = session['tsv_file']
             feature = "bi" if "bigram" in tsv_file.split('_')[0] else "tri"
             words = '$'
 
