@@ -4,9 +4,17 @@ from sklearn.feature_extraction.text import CountVectorizer
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.pipeline import Pipeline
 from sklearn.decomposition import TruncatedSVD
-from sklearn.linear_model import LogisticRegression
+
 from sklearn.naive_bayes import MultinomialNB
+from sklearn.linear_model import LogisticRegression
+from sklearn.linear_model import RidgeClassifier
+from sklearn.neighbors import NearestCentroid
+from sklearn.svm import LinearSVC
 from sklearn.neural_network import MLPClassifier
+
+
+
+
 from sklearn.metrics import classification_report
 import spacy
 
@@ -50,6 +58,30 @@ def normalize(train_sf):
         training_normalizations.append(norm_df)
     return training_normalizations
 
+def classify(training_sets, test_set):
+
+    x_test = test_set['Features']
+    y_test = test_set['Target']
+
+    normalizations = ['No normalization', 'Stop Words', 'Lemmatization', 'Stop Words + Lemmatization']
+    representations = [CountVectorizer(), CountVectorizer(binary=True), TfidfVectorizer()]
+
+    for i,trainig_set in enumerate(training_sets):
+
+        x_train = trainig_set['Features']
+        y_train = trainig_set['Target']
+
+        for representation in representations:
+            print(normalizations[i])
+            pipe = Pipeline([('text_representation', representation), ('classifier', MLPClassifier())])
+            print(pipe)
+            pipe.fit(x_train, y_train)
+            print ('Total Features: ' + str(len(pipe['text_representation'].get_feature_names_out())))
+            y_pred = pipe.predict(x_test)
+            print(classification_report(y_test,y_pred))
+
+
+
 
 
 def main():
@@ -62,29 +94,17 @@ def main():
         return
 
     train_sf, test_sf = train_test_split(sf, test_size=0.2, random_state=21, shuffle=True, stratify=sf['Target'])
-    # X_train = train_sf['Features']
-    # X_train = train_sf['Features']
-    # X_train = train_sf['Features']
-    # X_train = train_sf['Features']
-
 
     # print("Distribución en Train set:\n", train_sf['Target'].value_counts(normalize=True))
     # print("Distribución en Test set:\n", test_sf['Target'].value_counts(normalize=True))
 
+
+
     training_normalizations = normalize(train_sf)
 
-    outputs = ['RAW.tsv','SW.tsv','LMT.tsv','BOTH.tsv']
+    classify(training_normalizations,test_sf)
 
-    for i,normalization in enumerate(training_normalizations):
-        out = pd.DataFrame(normalization)
-        out.to_csv(outputs[i], sep='\t', index=False)
 
-    # pipe = Pipeline([('text_representation', TfidfVectorizer()), ('classifier', MultinomialNB())])
-    # print(pipe)
-    # pipe.fit(training_normalizations[3]['Features'], training_normalizations[3]['Target'])
-    # print (len(pipe['text_representation'].get_feature_names_out()))
-    # y_pred = pipe.predict(test_sf['Features'])
-    # print(classification_report(test_sf['Target'],y_pred))
 
 
 if __name__ == "__main__":

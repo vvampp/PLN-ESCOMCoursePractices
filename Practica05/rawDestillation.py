@@ -15,10 +15,17 @@ def main():
     rows = []
 
     for i,row in sf.iterrows():
-        rows.append({
-            "Features": str(row.iloc[1]) + " " + str(row.iloc[2]),
-            "Target": str(row.iloc[3])
-        })
+        if (str(row.iloc[3]) == 'Economia'):
+            rows.append({
+                "Features": str(row.iloc[1]) + " " + str(row.iloc[2]),
+                "Target": 'Economía'
+            })
+        else:
+            rows.append({
+                "Features": str(row.iloc[1]) + " " + str(row.iloc[2]),
+                "Target": str(row.iloc[3])
+            })
+            
 
     df = pd.DataFrame(rows, columns=columns)
     df.columns = df.columns.str.strip()
