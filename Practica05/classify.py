@@ -1,6 +1,8 @@
 import pandas as pd
 import warnings
 import spacy
+import pickle
+from os import path
 
 from sklearn.model_selection import train_test_split
 
@@ -16,9 +18,9 @@ from sklearn.neighbors import NearestCentroid
 from sklearn.svm import LinearSVC
 from sklearn.neural_network import MLPClassifier
 
-from sklearn.metrics import classification_report
+from sklearn.metrics import classification_report, f1_score
+from sklearn.model_selection import GridSearchCV        # https://scikit-learn.org/dev/modules/generated/sklearn.model_selection.GridSearchCV.html
 from sklearn.exceptions import UndefinedMetricWarning
-
 
 nlp = spacy.load('es_core_news_sm')
 warnings.filterwarnings("ignore", category=UndefinedMetricWarning)
@@ -61,32 +63,65 @@ def normalize(train_sf):
         training_normalizations.append(norm_df)
     return training_normalizations
 
-# CLASIFICAR
-def classify(training_sets, test_set):
+param_grid = {
+    MultinomialNB: {'classifier__alpha': [0.1, 0.5, 1.0]},
+    LogisticRegression: {'classifier__C': [0.01, 0.1, 1, 10]},
+    RidgeClassifier: {'classifier__alpha': [0.1, 1.0, 10.0]},
+    NearestCentroid: {'classifier__metric': ['euclidean', 'manhattan']},
+    LinearSVC: {'classifier__C': [0.01, 0.1, 1, 10]},
+    MLPClassifier: {
+        'classifier__hidden_layer_sizes': [(50,), (100,), (50, 50)],
+        'classifier__alpha': [0.0001, 0.001]
+    }
+}
 
+def classify(training_sets, test_set):
     normalizations = ['No normalization', 'Stop Words', 'Lemmatization', 'Stop Words + Lemmatization']
     representations = [CountVectorizer(), CountVectorizer(binary=True), TfidfVectorizer()]
-    classifiers = [MultinomialNB(), LogisticRegression(), RidgeClassifier(), NearestCentroid(), LinearSVC(), MLPClassifier()]
+    dimentionality_reductions = [None, TruncatedSVD(1000), TruncatedSVD(500), TruncatedSVD(300)]
+    classifiers = [MultinomialNB(), LogisticRegression(max_iter=1000), RidgeClassifier(), NearestCentroid(), LinearSVC(max_iter=5000), MLPClassifier(max_iter=1000)]
 
     x_test = test_set['Features']
     y_test = test_set['Target']
     
     for classifier in classifiers:
-        print('\t====='+str(classifier)+'=====')
+        classifier_name = classifier.__class__.__name__
+        print('\t=====' + str(classifier_name) + '=====')
+        
+        for reduction in dimentionality_reductions:
+            # Omite la combinación de MultinomialNB con cualquier TruncatedSVD
+            if isinstance(classifier, MultinomialNB) and reduction is not None:
+                continue  # Salta esta combinación
+            
+            for i, training_set in enumerate(training_sets):
+                x_train = training_set['Features']
+                y_train = training_set['Target']
+                
+                for representation in representations:
+                    # Configura el pipeline dinámicamente para incluir o no el paso de reducción de dimensionalidad
+                    if reduction is None:
+                        pipe = Pipeline([('text_representation', representation), ('classifier', classifier)])
+                    else:
+                        pipe = Pipeline([('text_representation', representation), ('dimentionality_reduction', reduction), ('classifier', classifier)])
 
-        for i,trainig_set in enumerate(training_sets):
-            x_train = trainig_set['Features']
-            y_train = trainig_set['Target']
+                    param_search = param_grid.get(type(classifier), {})
+                    grid = GridSearchCV(pipe, param_search, cv=5, scoring='f1_macro', n_jobs=-1)
 
-            for representation in representations:
-                print(normalizations[i])
-                pipe = Pipeline([('text_representation', representation), ('classifier', classifier)])
-                print(pipe)
-                pipe.fit(x_train, y_train)
-                print ('Total Features: ' + str(len(pipe['text_representation'].get_feature_names_out())))
-                y_pred = pipe.predict(x_test)
-                print(classification_report(y_test,y_pred))
+                    grid.fit(x_train, y_train)
+                    best_model = grid.best_estimator_
+
+                    print(normalizations[i])
+                    print(representation)
+                    print(reduction)
+                    print(grid.best_params_)
+
+                    y_pred = best_model.predict(x_test)
+                    print(classification_report(y_test, y_pred, zero_division=0))
+        
         print('\n\n')
+
+
+
 
 
 def main():
