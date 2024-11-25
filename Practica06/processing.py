@@ -271,6 +271,17 @@ def negations(data):
 
 
 def testClassifiers(X_train, y_train):
+    # Asegurarse de que X_train es una csr_matrix para facilitar la indexación
+    if not isinstance(X_train, csr_matrix):
+        X_train = csr_matrix(X_train)
+
+    # Asegurarse de que y_train es una Serie de pandas para usar iloc
+    if not isinstance(y_train, pd.Series):
+        y_train = pd.Series(y_train)
+
+    # Reindexar y_train para evitar problemas de indexación
+    y_train = y_train.reset_index(drop=True)
+
     models = {
         'LogisticRegression': {
             'model': LogisticRegression(max_iter=1000),
@@ -306,16 +317,16 @@ def testClassifiers(X_train, y_train):
         grid = GridSearchCV(spec['model'], spec['params'], cv=skf, scoring='f1_macro')
         grid.fit(X_train, y_train)
         best_model = grid.best_estimator_
-        scores = []
         print(f"{name} - Mejores parámetros: {grid.best_params_}")
 
         fold_reports = []
+        scores = []
+
         for train_idx, val_idx in skf.split(X_train, y_train):
             X_fold_train, X_fold_val = X_train[train_idx], X_train[val_idx]
-            y_fold_train, y_fold_val = y_train[train_idx], y_train[val_idx]
+            y_fold_train, y_fold_val = y_train.iloc[train_idx], y_train.iloc[val_idx]  # Uso de iloc para indexar y_train
 
             best_model.fit(X_fold_train, y_fold_train)
-
             y_pred = best_model.predict(X_fold_val)
 
             report = classification_report(y_fold_val, y_pred, digits=4)
@@ -337,13 +348,10 @@ def testClassifiers(X_train, y_train):
 
 def main():
     try:
-
         train_data, testing_data = createDataSet()
         balanced_train_data = balanceClasses(train_data)
-
         if not os.path.exists('final_training_features.pkl'):
             
-
             if os.path.exists('normalized_train_set.tsv'):          
                 normalized_data = pd.read_csv('normalized_train_set.tsv', sep='\t')
          
@@ -352,7 +360,6 @@ def main():
                 normalized_data = normalize(normalized_data)
                 normalized_data = negations(normalized_data)
                 normalized_data.to_csv('normalized_train_set.tsv',sep='\t', index=False)
-
             if os.path.exists('lexicon_sel.pkl'):
                 with open('lexicon_sel.pkl', 'rb') as lexicon_file:
                     lexicon_sel = pickle.load(lexicon_file)
@@ -366,21 +373,13 @@ def main():
             with open('final_training_features.pkl', 'wb') as pkl_file:
                 pickle.dump(feature_matrix, pkl_file)
             print("Archivo guardado: final_training_features.pkl")
-
-
         with open('final_training_features.pkl', 'rb') as file:
             training_data = pickle.load(file)
-
         X_train = training_data
         y_train = balanced_train_data['target'].astype(int)
-
         testClassifiers(X_train,y_train)
         
-
-
     except Exception as e:
         print(f'Error durante el flujo principal: {e}')
-
-
 if __name__ == '__main__':
     main()
