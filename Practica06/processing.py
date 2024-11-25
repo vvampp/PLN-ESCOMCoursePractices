@@ -5,6 +5,7 @@ import spacy
 from spellchecker import SpellChecker
 import re
 from sklearn.feature_extraction.text import TfidfVectorizer
+from sklearn.feature_extraction.text import CountVectorizer
 from scipy.sparse import hstack
 import numpy as np
 import pickle
@@ -93,15 +94,15 @@ def getSELFeatures(cadenas, lexicon_sel):
 
 
 
-def add_sentiment_features(tfidf_matrix, cadenas, lexicon_sel):
+def add_sentiment_features(matrix, cadenas, lexicon_sel):
 
     polaridad = getSELFeatures(cadenas, lexicon_sel)
 
     polaridad_pos = np.array([p['acumuladopositivo'] for p in polaridad]).reshape(-1, 1)
     polaridad_neg = np.array([p['acumuladonegative'] for p in polaridad]).reshape(-1, 1)
-    final_matrix = hstack([tfidf_matrix, polaridad_pos, polaridad_neg])
+    final_matrix = hstack([matrix, polaridad_pos, polaridad_neg])
     try:
-        final_matrix = hstack([tfidf_matrix, polaridad_pos, polaridad_neg])
+        final_matrix = hstack([matrix, polaridad_pos, polaridad_neg])
     except Exception as e:
         print(f"Error al combinar matrices: {e}")
         raise
@@ -116,7 +117,7 @@ def postNormalizationWithTFIDF(data, lexicon_sel):
         tfidf_matrix = vectorizador.fit_transform(data['features'])
         print(f"TF-IDF Matrix Shape: {tfidf_matrix.shape}")
     except Exception as e:
-        print(f"rror al generar la matriz TF-IDF: {e}")
+        print(f"Error al generar la matriz TF-IDF: {e}")
         raise
 
     # Convertir 'features' a lista de cadenas
@@ -133,6 +134,26 @@ def postNormalizationWithTFIDF(data, lexicon_sel):
     return final_matrix
 
 
+def postNormalizationWithFrequency(data,lexicon_sel):
+    try:
+        vectorizador = CountVectorizer()
+        frequency_matrix = vectorizador.fit_transform(data['features'])
+        print(f"Frequency Matrix Shape: {frequency_matrix.shape}")
+    except Exception as e:
+        print(f"Error al generar la matriz de Frecuencia: {e}")
+        raise  
+
+    cadenas = data['features'].tolist()
+
+    try: 
+        final_matrix = add_sentiment_features(frequency_matrix, cadenas, lexicon_sel)
+    except Exception as e:
+        print(f"Error al agregar características de SEL: {e}")
+        raise
+
+    print(f"Matriz final procesada con éxito: {final_matrix.shape}")
+    return final_matrix
+    
 
 def createDataSet():
     try:
@@ -250,8 +271,6 @@ def negations(data):
 
 
 def testClassifiers(X_train, y_train):
-
-
     models = {
         'LogisticRegression': {
             'model': LogisticRegression(max_iter=1000),
@@ -282,17 +301,35 @@ def testClassifiers(X_train, y_train):
     }
 
     skf = StratifiedKFold(n_splits=5, shuffle=True, random_state=42)
-    results = {}
 
     for name, spec in models.items():
         grid = GridSearchCV(spec['model'], spec['params'], cv=skf, scoring='f1_macro')
         grid.fit(X_train, y_train)
         best_model = grid.best_estimator_
-        scores = cross_validate(best_model, X_train, y_train, cv=skf, scoring='f1_macro', return_train_score=False)
-        results[name] = scores['test_score']
+        scores = []
         print(f"{name} - Mejores parámetros: {grid.best_params_}")
-        print(f"{name} - F1 macro por fold: {scores['test_score']}")
-        print(f"{name} - F1 macro promedio: {np.mean(scores['test_score'])}")
+
+        fold_reports = []
+        for train_idx, val_idx in skf.split(X_train, y_train):
+            X_fold_train, X_fold_val = X_train[train_idx], X_train[val_idx]
+            y_fold_train, y_fold_val = y_train[train_idx], y_train[val_idx]
+
+            best_model.fit(X_fold_train, y_fold_train)
+
+            y_pred = best_model.predict(X_fold_val)
+
+            report = classification_report(y_fold_val, y_pred, digits=4)
+            fold_reports.append(report)
+
+            fold_f1 = f1_score(y_fold_val, y_pred, average='macro')
+            scores.append(fold_f1)
+
+        for i, report in enumerate(fold_reports, 1):
+            print(f"[Reporte {i}]\n{report}")
+
+        print(f"{name} - F1 macro por fold: {scores}")
+        print(f"{name} - F1 macro promedio: {np.mean(scores)}")
+
 
 
 
