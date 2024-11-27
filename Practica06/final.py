@@ -212,8 +212,8 @@ def vectorizeData(data, lexicon_sel, vectorizador, is_training=True):
 
 
 
-def applySMOTE(X_train, y_train, target_classes=[1, 2, 3], random_state=0):
-    # Convertir y_train a numpy array si no lo es
+def applySMOTE(X_train, y_train, target_classes=[1, 2, 3],target_samples=5000, random_state=0):
+        # Convertir y_train a numpy array si no lo es
     if isinstance(y_train, pd.Series):
         y_train = y_train.values
 
@@ -236,8 +236,11 @@ def applySMOTE(X_train, y_train, target_classes=[1, 2, 3], random_state=0):
     # Convertir a formato denso para SMOTE
     X_filtered_dense = X_filtered.toarray()
     
+    # Definir la estrategia de muestreo personalizada
+    sampling_strategy = {cls: target_samples for cls in target_classes}
+
     # Aplicar SMOTE
-    smote = SMOTE(random_state=random_state)
+    smote = SMOTE(sampling_strategy=sampling_strategy, random_state=random_state)
     X_smote_dense, y_smote = smote.fit_resample(X_filtered_dense, y_filtered)
 
     # Convertir datos SMOTE de nuevo a formato disperso
@@ -262,11 +265,11 @@ def applySMOTE(X_train, y_train, target_classes=[1, 2, 3], random_state=0):
         y_smote_combined = y_smote
 
     with open('X_combined_SMOTE.pkl', 'wb') as pkl_file:
-        pickle.dump(X_smote_combined,pkl_file)
+        pickle.dump(X_smote_combined, pkl_file)
         print('Archivo guardado: X_combined_SMOTE.pkl')
 
     with open('y_combined_SMOTE.pkl', 'wb') as pkl_file:
-        pickle.dump(y_smote_combined,pkl_file)
+        pickle.dump(y_smote_combined, pkl_file)
         print('Archivo guardado: y_combined_SMOTE.pkl')
 
     return X_smote_combined, y_smote_combined
@@ -277,10 +280,14 @@ def balanceTrainingSet(X_train, y_train):
     # Convertir X_train a csr_matrix si no lo es
     if not isinstance(X_train, csr_matrix):
         X_train = csr_matrix(X_train)
+
+    # Convertir y_train a un array numpy si no lo es
+    if isinstance(y_train, pd.Series):
+        y_train = y_train.values
     
     # Verificación de la distribución de clases antes de balancear
     print("Distribución de clases antes del balanceo:")
-    print(y_train.value_counts())
+    print(pd.Series(y_train).value_counts())  # Convertir a pandas.Series temporalmente
     
     # Convertir y_train a un array numpy para facilitar la manipulación
     y_train = np.array(y_train)
@@ -430,8 +437,8 @@ def main():
     feature_test_matrix = vectorizeData(test_data,lexicon_sel, vectorizador, is_training=False)
 
     # Balanceo de feature_train_matrix junto con train_data['target']
-    # balanced_features, balanced_targets = applySMOTE(feature_train_matrix, train_data['target'], target_classes=[1,2,3])
-    balanced_features, balanced_targets = balanceTrainingSet(feature_train_matrix, train_data['target'])
+    #balanced_features, balanced_targets = applySMOTE(feature_train_matrix, train_data['target'], target_classes=[1,2,3])
+    balanced_features, balanced_targets = balanceTrainingSet(feature_train_matrix,train_data['target'])
 
     # cross validation con opciones de clasificadores
     # testClassifiers(balanced_features,balanced_targets)

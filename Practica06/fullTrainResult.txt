@@ -1,0 +1,31 @@
+Archivo guardado: normalized_data_set.tsv
+Matrix Shape: (24169, 48074)
+Matriz combinada creada con dimensiones: (24169, 48076)
+Matriz final procesada con éxito: (24169, 48076)
+Matrix Shape: (6043, 48074)
+Matriz combinada creada con dimensiones: (6043, 48076)
+Matriz final procesada con éxito: (6043, 48076)
+Distribución de clases antes del balanceo:
+5    16748
+4     4702
+3     1697
+2      584
+1      438
+Name: count, dtype: int64
+
+Distribución de clases después del balanceo:
+(array([1, 2, 3, 4, 5], dtype=int64), array([ 1916,  1989,  2545,  4048, 10071], dtype=int64))
+Entrenando modelo  SVC - {'C': 10, 'kernel': 'rbf', class_weight: 'balanced'} ...
+Modelo SVC guardado exitosamente en 'SVC_Model.pkl'.
+Evaluando modelo clasificador
+              precision    recall  f1-score   support
+
+           1       0.59      0.43      0.50       109
+           2       0.30      0.17      0.22       146
+           3       0.40      0.33      0.36       424
+           4       0.42      0.48      0.45      1176
+           5       0.86      0.86      0.86      4188
+
+    accuracy                           0.72      6043
+   macro avg       0.51      0.45      0.49      6043
+weighted avg       0.72      0.72      0.72      6043
