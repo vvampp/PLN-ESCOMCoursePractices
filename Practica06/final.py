@@ -16,7 +16,7 @@ from sklearn.naive_bayes import MultinomialNB
 from sklearn.svm import SVC
 from sklearn.neural_network import MLPClassifier
 from sklearn.model_selection import GridSearchCV, cross_validate, StratifiedKFold
-from sklearn.metrics import classification_report, make_scorer, f1_score
+from sklearn.metrics import classification_report, make_scorer, f1_score, confusion_matrix
 
 from imblearn.over_sampling import SMOTE
 from sklearn.preprocessing import LabelEncoder
@@ -449,17 +449,26 @@ def main():
     X_test = feature_test_matrix
     y_test = test_data['target']
 
-    svc = SVC(C=10, kernel='rbf', class_weight='balanced', random_state=0)
-    print("Entrenando modelo  SVC - {'C': 10, 'kernel': 'rbf', class_weight: 'balanced'} ...")
-    svc.fit(X_train,y_train)
+    if not os.path.exists('SVC_Model.pkl'):
 
-    with open('SVC_Model.pkl', 'wb') as pkl_file:
-        pickle.dump(svc,pkl_file)
-    print("Modelo SVC guardado exitosamente en 'SVC_Model.pkl'.")
+        svc = SVC(C=10, kernel='rbf', class_weight='balanced', random_state=0)
+        print("Entrenando modelo  SVC - {'C': 10, 'kernel': 'rbf', class_weight: 'balanced'} ...")
+        svc.fit(X_train,y_train)
+        with open('SVC_Model.pkl', 'wb') as pkl_file:
+            pickle.dump(svc,pkl_file)
+        print("Modelo SVC guardado exitosamente en 'SVC_Model.pkl'.")
+
+    else:
+        print('Abriendo SVC_Model.pkk')
+        with open('SVC_Model.pkl', 'rb') as pkl_file:
+            svc = pickle.load(pkl_file)
 
     # test del modelo
     print("Evaluando modelo clasificador")
     y_pred = svc.predict(X_test)
+    print("Matriz de confusión")
+    print(confusion_matrix(y_test,y_pred))
+    print("Reporte de clasificación")
     print(classification_report(y_test,y_pred))
 
 

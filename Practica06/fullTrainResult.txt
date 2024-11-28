@@ -15,9 +15,15 @@ Name: count, dtype: int64
 
 Distribución de clases después del balanceo:
 (array([1, 2, 3, 4, 5], dtype=int64), array([ 1916,  1989,  2545,  4048, 10071], dtype=int64))
-Entrenando modelo  SVC - {'C': 10, 'kernel': 'rbf', class_weight: 'balanced'} ...
-Modelo SVC guardado exitosamente en 'SVC_Model.pkl'.
+Abriendo SVC_Model.pkk
 Evaluando modelo clasificador
+Matriz de confusión
+[[  47   15   21   18    8]
+ [  12   25   63   35   11]
+ [  14   27  139  186   58]
+ [   4   11   82  569  510]
+ [   2    6   46  548 3586]]
+Reporte de clasificación
               precision    recall  f1-score   support
 
            1       0.59      0.43      0.50       109

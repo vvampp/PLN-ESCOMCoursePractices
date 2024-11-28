@@ -15,7 +15,7 @@ target
 Name: count, dtype: int64
 
 Distribución de clases después del balanceo:
-(array([1, 2, 3, 4, 5], dtype=int64), array([1067, 1140, 1697, 3199, 9222], dtype=int64))
+(array([1, 2, 3, 4, 5], dtype=int64), array([ 1916,  1989,  2545,  4048, 10071], dtype=int64))
 LogisticRegression - Mejores parámetros: {'C': 10}
 [Reporte 1]
               precision    recall  f1-score   support
